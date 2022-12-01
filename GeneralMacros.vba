@@ -19,7 +19,8 @@ Sub EmphasizeSimilar()
     Dim lastRow As Long
     Dim tagList As String
     Dim tagArray() As String
-    Dim flag As Boolean
+    Dim flagTagMatch As Boolean
+    Dim flagSubjectMatch As Boolean
     
     'Get Current row and decide if exit
     currentRow = ActiveCell.Row
@@ -37,22 +38,30 @@ Sub EmphasizeSimilar()
     
     For i = startingRow To lastRow
 
-        flag = False
+        flagTagMatch = False
+        flagSubjectMatch = False
         
         For Each Item In tagArray
 
             If InStr(1, Cells(i, tagColumn).Value, Item) Then
-                flag = True
+                flagTagMatch = True
+            End If
+            
+            If InStr(1, Cells(i, "F").Value, Item) Then
+                flagSubjectMatch = True
             End If
             
         Next Item
         
-        If (flag) Then
+        If (flagTagMatch) Then
             ActiveSheet.Range(Cells(i, "A"), Cells(i, lastColumnForStyle)).Font.Bold = True
             Debug.Print ("family row: " & i)
             Cells(i, "K").Value = "1"
-        Else
+        ElseIf (flagSubjectMatch) Then
             Cells(i, "K").Value = "2"
+            ActiveSheet.Range(Cells(i, "A"), Cells(i, lastColumnForStyle)).Font.ColorIndex = 16
+        Else
+            Cells(i, "K").Value = "3"
             ActiveSheet.Range(Cells(i, "A"), Cells(i, lastColumnForStyle)).Font.ColorIndex = 16
         End If
         
