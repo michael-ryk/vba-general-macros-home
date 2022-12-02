@@ -12,7 +12,7 @@ Sub EmphasizeSimilar()
     'Constants
     Const startingRow As Integer = 7
     Const tagColumn As String = "J"
-    Const lastColumnForStyle As String = "J"
+    Const lastColumnForStyle As String = "K"
     
     'Declare variables
     Dim currentRow As Integer
@@ -31,7 +31,7 @@ Sub EmphasizeSimilar()
     tagArray = Split(tagList, " ")
     
     ActiveSheet.Range(Cells(startingRow, "A"), Cells(lastRow, lastColumnForStyle)).Font.Bold = False
-    ActiveSheet.Range(Cells(startingRow, "A"), Cells(lastRow, lastColumnForStyle)).Font.ColorIndex = 56
+    ActiveSheet.Range(Cells(startingRow, "A"), Cells(lastRow, lastColumnForStyle)).Font.Color = RGB(56, 56, 56)
     
     Debug.Print ("Current selected row: " & currentRow)
     Debug.Print ("tag list from current row: " & tagList)
@@ -59,10 +59,10 @@ Sub EmphasizeSimilar()
             Cells(i, "K").Value = "1"
         ElseIf (flagSubjectMatch) Then
             Cells(i, "K").Value = "2"
-            ActiveSheet.Range(Cells(i, "A"), Cells(i, lastColumnForStyle)).Font.ColorIndex = 16
+            ActiveSheet.Range(Cells(i, "A"), Cells(i, lastColumnForStyle)).Font.Color = RGB(128, 128, 128)
         Else
             Cells(i, "K").Value = "3"
-            ActiveSheet.Range(Cells(i, "A"), Cells(i, lastColumnForStyle)).Font.ColorIndex = 16
+            ActiveSheet.Range(Cells(i, "A"), Cells(i, lastColumnForStyle)).Font.Color = RGB(217, 217, 217)
         End If
         
     Next i
