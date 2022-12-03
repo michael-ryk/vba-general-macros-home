@@ -12,11 +12,12 @@ Sub EmphasizeSimilar()
     Const tagColumn As String = "H"
     Const filterColumn = "I"
     Const subjectColumn = "D"
+    Const lockColumn = "J"
+    Const previousSelectedRowCellAddress = "D2"
     Const colorStartColumn As String = "A"
-    Const colorEndColumn As String = "I"
+    Const colorEndColumn As String = "J"
     Const boldStartColumn = "D"
     Const boldEndColumn = "E"
-    Const previousSelectedRowCellAddress = "F2"
     
     'Declare variables
     Dim currentRow As Integer
@@ -48,9 +49,6 @@ Sub EmphasizeSimilar()
     ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
     ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.Color = RGB(56, 56, 56)
     
-    'Color Active line
-    ActiveSheet.Range(Cells(currentRow, colorStartColumn), Cells(currentRow, colorEndColumn)).Font.Color = RGB(48, 84, 150)
-    
     '=== Main Loop ===
     For i = startingRow To lastRow
         
@@ -70,24 +68,34 @@ Sub EmphasizeSimilar()
         
         'Set row filter result value for future sorting
         If (flagTagMatch) Then
+            'Tags matched in tags cell - color black + bold
             ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
             ActiveSheet.Cells(i, filterColumn).Value = "2"
         ElseIf (flagSubjectMatch) Then
+            'tags included subject cell - color grey
             ActiveSheet.Cells(i, filterColumn).Value = "3"
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(128, 128, 128)
         Else
+            'All remained rows - very light grey
             ActiveSheet.Cells(i, filterColumn).Value = "4"
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(217, 217, 217)
         End If
         
-        'Selected row = 1 to make it first after sorting
-        If (i = currentRow) Then
-            ActiveSheet.Cells(i, filterColumn).Value = "1"
+        'Set lock rows before active row + color green
+        If (ActiveSheet.Cells(i, lockColumn).Value = "yes") Then
+            ActiveSheet.Cells(i, filterColumn).Value = "0"
+            ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(0, 176, 80)
         End If
         
-        'Color previous row
+        'Color previous row - light blue
         If (ActiveSheet.Cells(i, subjectColumn) = previousSelectedSubject) Then
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(142, 169, 219)
+        End If
+        
+        'Selected row = 1 to make it first after sorting + color Dark blue
+        If (i = currentRow) Then
+            ActiveSheet.Cells(i, filterColumn).Value = "1"
+            ActiveSheet.Range(Cells(currentRow, colorStartColumn), Cells(currentRow, colorEndColumn)).Font.Color = RGB(48, 84, 150)
         End If
         
     Next i
