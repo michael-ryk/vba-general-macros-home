@@ -1,5 +1,6 @@
 Sub EmphasizeSimilar()
     ' ==========================================================================
+    ' Version: v1.0
     ' Description: Emphasize rows with similar tags and gray out all remaining
     ' Excel where used: My code write repeat
     ' ==========================================================================
