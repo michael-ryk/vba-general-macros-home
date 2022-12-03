@@ -14,6 +14,7 @@ Sub EmphasizeSimilar()
     Const filterColumn = "I"
     Const subjectColumn = "D"
     Const lockColumn = "J"
+    Const dateColumn = "K"
     Const previousSelectedRowCellAddress = "D2"
     Const colorStartColumn As String = "A"
     Const colorEndColumn As String = "J"
@@ -29,17 +30,23 @@ Sub EmphasizeSimilar()
     Dim flagSubjectMatch As Boolean
     Dim currentSubject As String
     Dim previousSelectedSubject As String
+    Dim todayDate As Date
     Dim i As Long
     
     'Validate selected row in valid range
     currentRow = ActiveCell.Row
-    If (currentRow < startingRow) Then Exit Sub
-    
     lastRow = ActiveSheet.Range("A" & Rows.Count).End(xlUp).Row
+    If (currentRow < startingRow) Then
+        ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
+        ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.Color = RGB(56, 56, 56)
+        Exit Sub
+    End If
+    
     tagList = Cells(currentRow, tagColumn)
     tagArray = Split(tagList, " ")
     previousSelectedSubject = ActiveSheet.Range(previousSelectedRowCellAddress).Value
     currentSubject = ActiveSheet.Cells(currentRow, subjectColumn).Value
+    todayDate = Date
     'Debug.Print ("Current selected row: " & currentRow)
     Debug.Print ("tag list from current row: " & tagList)
     Debug.Print ("Current selected subject: " & currentSubject)
@@ -93,9 +100,10 @@ Sub EmphasizeSimilar()
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(142, 169, 219)
         End If
         
-        'Selected row = 1 to make it first after sorting + color Dark blue
+        'Selected row = 1 to make it first after sorting + color Dark blue + update date
         If (i = currentRow) Then
             ActiveSheet.Cells(i, filterColumn).Value = "1"
+            ActiveSheet.Cells(i, dateColumn).Value = todayDate
             ActiveSheet.Range(Cells(currentRow, colorStartColumn), Cells(currentRow, colorEndColumn)).Font.Color = RGB(48, 84, 150)
         End If
         
@@ -105,7 +113,7 @@ Sub EmphasizeSimilar()
     'ActiveSheet.ListObjects("Concepts").Range.AutoFilter Field:=11, Criteria1:="1"
     
     'Sort Data
-    ActiveSheet.ListObjects("Concepts").Sort.SortFields.Clear
+    'ActiveSheet.ListObjects("Concepts").Sort.SortFields.Clear
     ActiveSheet.ListObjects("Concepts").Sort.SortFields. _
         Add2 Key:=Range("Concepts[[#All],[Filter]]"), SortOn:=xlSortOnValues, _
         Order:=xlAscending, DataOption:=xlSortNormal
