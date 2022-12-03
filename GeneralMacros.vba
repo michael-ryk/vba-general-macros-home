@@ -69,7 +69,7 @@ Sub EmphasizeSimilar()
                 flagTagMatch = True
             End If
             'Mark row which have at least one keyword from tag section in subject
-            If InStr(1, Cells(i, "F").Value, Item) Then
+            If InStr(1, Cells(i, subjectColumn).Value, Item) Then
                 flagSubjectMatch = True
             End If
         Next Item
