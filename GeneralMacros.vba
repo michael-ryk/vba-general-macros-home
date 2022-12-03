@@ -15,6 +15,7 @@ Sub EmphasizeSimilar()
     Const colorEndColumn As String = "I"
     Const boldStartColumn = "D"
     Const boldEndColumn = "E"
+    Const previousSelectedRowCellAddress = "F2"
     
     'Declare variables
     Dim currentRow As Integer
@@ -23,24 +24,32 @@ Sub EmphasizeSimilar()
     Dim tagArray() As String
     Dim flagTagMatch As Boolean
     Dim flagSubjectMatch As Boolean
+    Dim previousSelectedRow As Long
+    Dim i As Long
     
-    'Get Current row and decide if exit
+    'Validate selected row in valid range
     currentRow = ActiveCell.Row
     If (currentRow < startingRow) Then Exit Sub
     
     lastRow = ActiveSheet.Range("A" & Rows.Count).End(xlUp).Row
     tagList = Cells(currentRow, tagColumn)
     tagArray = Split(tagList, " ")
+    previousSelectedRow = ActiveSheet.Range(previousSelectedRowCellAddress).Value
+    ActiveSheet.Range(previousSelectedRowCellAddress).Value = currentRow
+    Debug.Print ("Current selected row: " & currentRow)
+    Debug.Print ("tag list from current row: " & tagList)
+    Debug.Print ("Previous selected row: " & previousSelectedRow)
     
+    'Set bold and colors to default for all rows
     ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
     ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.Color = RGB(56, 56, 56)
     
-    Debug.Print ("Current selected row: " & currentRow)
-    Debug.Print ("tag list from current row: " & tagList)
+    'Color Active line
+    ActiveSheet.Range(Cells(currentRow, colorStartColumn), Cells(currentRow, colorEndColumn)).Font.Color = RGB(48, 84, 150)
     
     '=== Main Loop ===
     For i = startingRow To lastRow
-
+        
         flagTagMatch = False
         flagSubjectMatch = False
         
@@ -58,18 +67,29 @@ Sub EmphasizeSimilar()
         'Set row filter result value for future sorting
         If (flagTagMatch) Then
             ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
-            Cells(i, filterColumn).Value = "1"
+            ActiveSheet.Cells(i, filterColumn).Value = "2"
         ElseIf (flagSubjectMatch) Then
-            Cells(i, filterColumn).Value = "2"
+            ActiveSheet.Cells(i, filterColumn).Value = "3"
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(128, 128, 128)
         Else
-            Cells(i, filterColumn).Value = "3"
+            ActiveSheet.Cells(i, filterColumn).Value = "4"
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(217, 217, 217)
+        End If
+        
+        'Selected row = 1 to make it first after sorting
+        If (i = currentRow) Then
+            ActiveSheet.Cells(i, filterColumn).Value = "1"
         End If
         
     Next i
     
+    'Filter relevant match - Think if i want it
     'ActiveSheet.ListObjects("Concepts").Range.AutoFilter Field:=11, Criteria1:="1"
+        
+    'Color Previously active line
+    'ActiveSheet.Range(Cells(previousSelectedRow, colorStartColumn), Cells(previousSelectedRow, colorEndColumn)).Font.Color = RGB(142, 169, 219)
+    previousSelectedRow = currentRow
+    Debug.Print ("Previous row for next time: " & previousSelectedRow)
     
     'Sort Data
     ActiveSheet.ListObjects("Concepts").Sort.SortFields.Clear
