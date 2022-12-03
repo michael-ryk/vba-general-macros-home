@@ -11,6 +11,7 @@ Sub EmphasizeSimilar()
     Const startingRow As Integer = 7
     Const tagColumn As String = "H"
     Const filterColumn = "I"
+    Const subjectColumn = "D"
     Const colorStartColumn As String = "A"
     Const colorEndColumn As String = "I"
     Const boldStartColumn = "D"
@@ -24,7 +25,8 @@ Sub EmphasizeSimilar()
     Dim tagArray() As String
     Dim flagTagMatch As Boolean
     Dim flagSubjectMatch As Boolean
-    Dim previousSelectedRow As Long
+    Dim currentSubject As String
+    Dim previousSelectedSubject As String
     Dim i As Long
     
     'Validate selected row in valid range
@@ -34,11 +36,13 @@ Sub EmphasizeSimilar()
     lastRow = ActiveSheet.Range("A" & Rows.Count).End(xlUp).Row
     tagList = Cells(currentRow, tagColumn)
     tagArray = Split(tagList, " ")
-    previousSelectedRow = ActiveSheet.Range(previousSelectedRowCellAddress).Value
-    ActiveSheet.Range(previousSelectedRowCellAddress).Value = currentRow
-    Debug.Print ("Current selected row: " & currentRow)
+    previousSelectedSubject = ActiveSheet.Range(previousSelectedRowCellAddress).Value
+    currentSubject = ActiveSheet.Cells(currentRow, subjectColumn).Value
+    'Debug.Print ("Current selected row: " & currentRow)
     Debug.Print ("tag list from current row: " & tagList)
-    Debug.Print ("Previous selected row: " & previousSelectedRow)
+    Debug.Print ("Current selected subject: " & currentSubject)
+    Debug.Print ("Previous selected subject: " & previousSelectedSubject)
+    ActiveSheet.Range(previousSelectedRowCellAddress).Value = currentSubject
     
     'Set bold and colors to default for all rows
     ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
@@ -81,15 +85,15 @@ Sub EmphasizeSimilar()
             ActiveSheet.Cells(i, filterColumn).Value = "1"
         End If
         
+        'Color previous row
+        If (ActiveSheet.Cells(i, subjectColumn) = previousSelectedSubject) Then
+            ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(142, 169, 219)
+        End If
+        
     Next i
     
     'Filter relevant match - Think if i want it
     'ActiveSheet.ListObjects("Concepts").Range.AutoFilter Field:=11, Criteria1:="1"
-        
-    'Color Previously active line
-    'ActiveSheet.Range(Cells(previousSelectedRow, colorStartColumn), Cells(previousSelectedRow, colorEndColumn)).Font.Color = RGB(142, 169, 219)
-    previousSelectedRow = currentRow
-    Debug.Print ("Previous row for next time: " & previousSelectedRow)
     
     'Sort Data
     ActiveSheet.ListObjects("Concepts").Sort.SortFields.Clear
