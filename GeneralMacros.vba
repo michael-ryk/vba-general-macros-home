@@ -113,7 +113,7 @@ Sub EmphasizeSimilar()
     'ActiveSheet.ListObjects("Concepts").Range.AutoFilter Field:=11, Criteria1:="1"
     
     'Sort Data
-    'ActiveSheet.ListObjects("Concepts").Sort.SortFields.Clear
+    ActiveSheet.ListObjects("Concepts").Sort.SortFields.Clear
     ActiveSheet.ListObjects("Concepts").Sort.SortFields. _
         Add2 Key:=Range("Concepts[[#All],[Filter]]"), SortOn:=xlSortOnValues, _
         Order:=xlAscending, DataOption:=xlSortNormal
