@@ -9,7 +9,6 @@ Sub EmphasizeSimilar()
     Application.ScreenUpdating = False
     
     'Constants
-    Const tagColumn As String = "H"
     Const subjectColumn = "D"
     Const previousSelectedRowCellAddress = "D2"
     Const colorStartColumn As String = "A"
@@ -25,6 +24,7 @@ Sub EmphasizeSimilar()
     Dim lockColumn As Integer
     Dim dateColumn As Integer
     Dim connectiosColumn As Integer
+    Dim tagColumn As Integer
     Dim tagList As String
     Dim tagArray() As String
     Dim flagTagMatch As Boolean
@@ -38,15 +38,16 @@ Sub EmphasizeSimilar()
     
     'Assign variables based on current excel file
     tableName = ActiveSheet.ListObjects(1).Name
-    startingRow = ActiveSheet.ListObjects(1).Range.Cells(1, 1).row + 1
+    startingRow = ActiveSheet.ListObjects(1).Range.Cells(1, 1).Row + 1
     filterColumn = ActiveSheet.ListObjects(1).ListColumns("Filter").Range.Column
     lockColumn = ActiveSheet.ListObjects(1).ListColumns("Lock").Range.Column
     dateColumn = ActiveSheet.ListObjects(1).ListColumns("Date").Range.Column
     connectionsColumn = ActiveSheet.ListObjects(1).ListColumns("Connections").Range.Column
+    tagColumn = ActiveSheet.ListObjects(1).ListColumns("Tags").Range.Column
     
     'Validate selected row in valid range
-    currentRow = ActiveCell.row
-    lastRow = ActiveSheet.Range("A" & Rows.Count).End(xlUp).row
+    currentRow = ActiveCell.Row
+    lastRow = ActiveSheet.Range("A" & Rows.Count).End(xlUp).Row
     If (currentRow < startingRow) Then
         ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
         ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.Color = RGB(56, 56, 56)
@@ -55,8 +56,8 @@ Sub EmphasizeSimilar()
     
     tagList = Cells(currentRow, tagColumn)
     tagArray = Split(tagList, " ")
-    previousSelectedSubject = ActiveSheet.Range(previousSelectedRowCellAddress).value
-    currentSubject = ActiveSheet.Cells(currentRow, subjectColumn).value
+    previousSelectedSubject = ActiveSheet.Range(previousSelectedRowCellAddress).Value
+    currentSubject = ActiveSheet.Cells(currentRow, subjectColumn).Value
     todayDate = Date
     counter = 0
     'Debug.Print ("Current selected row: " & currentRow)
@@ -64,7 +65,7 @@ Sub EmphasizeSimilar()
     Debug.Print ("Current selected subject: " & currentSubject)
     Debug.Print ("Previous selected subject: " & previousSelectedSubject)
     Debug.Print (ActiveSheet.ListObjects(1).ListColumns("Filter").Range.Column)
-    ActiveSheet.Range(previousSelectedRowCellAddress).value = currentSubject
+    ActiveSheet.Range(previousSelectedRowCellAddress).Value = currentSubject
     
     'Set bold and colors to default for all rows
     ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
@@ -78,11 +79,11 @@ Sub EmphasizeSimilar()
         
         For Each Item In tagArray
             'Mark row which have one tag which included in selected row
-            If InStr(1, Cells(i, tagColumn).value, Item) Then
+            If InStr(1, Cells(i, tagColumn).Value, Item) Then
                 flagTagMatch = True
             End If
             'Mark row which have at least one keyword from tag section in subject
-            If InStr(1, Cells(i, subjectColumn).value, Item) Then
+            If InStr(1, Cells(i, subjectColumn).Value, Item) Then
                 flagSubjectMatch = True
             End If
         Next Item
@@ -91,21 +92,21 @@ Sub EmphasizeSimilar()
         If (flagTagMatch) Then
             'Tags matched in tags cell - color black + bold
             ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
-            ActiveSheet.Cells(i, filterColumn).value = "2"
+            ActiveSheet.Cells(i, filterColumn).Value = "2"
             counter = counter + 1
         ElseIf (flagSubjectMatch) Then
             'tags included subject cell - color grey
-            ActiveSheet.Cells(i, filterColumn).value = "3"
+            ActiveSheet.Cells(i, filterColumn).Value = "3"
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(128, 128, 128)
         Else
             'All remained rows - very light grey
-            ActiveSheet.Cells(i, filterColumn).value = "4"
+            ActiveSheet.Cells(i, filterColumn).Value = "4"
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(217, 217, 217)
         End If
         
         'Set lock rows before active row + color green
-        If (ActiveSheet.Cells(i, lockColumn).value = "yes") Then
-            ActiveSheet.Cells(i, filterColumn).value = "0"
+        If (ActiveSheet.Cells(i, lockColumn).Value = "yes") Then
+            ActiveSheet.Cells(i, filterColumn).Value = "0"
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(0, 176, 80)
         End If
         
@@ -116,8 +117,8 @@ Sub EmphasizeSimilar()
         
         'Selected row = 1 to make it first after sorting + color Dark blue + update date
         If (i = currentRow) Then
-            ActiveSheet.Cells(i, filterColumn).value = "1"
-            ActiveSheet.Cells(i, dateColumn).value = todayDate
+            ActiveSheet.Cells(i, filterColumn).Value = "1"
+            ActiveSheet.Cells(i, dateColumn).Value = todayDate
             ActiveSheet.Range(Cells(currentRow, colorStartColumn), Cells(currentRow, colorEndColumn)).Font.Color = RGB(48, 84, 150)
         End If
         
@@ -127,7 +128,7 @@ Sub EmphasizeSimilar()
     'ActiveSheet.ListObjects("Concepts").Range.AutoFilter Field:=11, Criteria1:="1"
     
     'Save quantity of connections to current selected row
-    ActiveSheet.Cells(currentRow, connectionsColumn).value = counter
+    ActiveSheet.Cells(currentRow, connectionsColumn).Value = counter
     
     'Sort Data
     ActiveSheet.ListObjects(tableName).Sort.SortFields.Clear
