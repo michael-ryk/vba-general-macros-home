@@ -16,6 +16,7 @@ Sub EmphasizeSimilar()
     Const subjectColumn = "D"
     Const lockColumn = "J"
     Const dateColumn = "K"
+    Const quantityColumn = "L"
     Const previousSelectedRowCellAddress = "D2"
     Const colorStartColumn As String = "A"
     Const colorEndColumn As String = "J"
@@ -32,6 +33,7 @@ Sub EmphasizeSimilar()
     Dim currentSubject As String
     Dim previousSelectedSubject As String
     Dim todayDate As Date
+    Dim counter As Integer
     Dim i As Long
     
     'Validate selected row in valid range
@@ -48,6 +50,7 @@ Sub EmphasizeSimilar()
     previousSelectedSubject = ActiveSheet.Range(previousSelectedRowCellAddress).value
     currentSubject = ActiveSheet.Cells(currentRow, subjectColumn).value
     todayDate = Date
+    counter = 0
     'Debug.Print ("Current selected row: " & currentRow)
     Debug.Print ("tag list from current row: " & tagList)
     Debug.Print ("Current selected subject: " & currentSubject)
@@ -80,6 +83,7 @@ Sub EmphasizeSimilar()
             'Tags matched in tags cell - color black + bold
             ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
             ActiveSheet.Cells(i, filterColumn).value = "2"
+            counter = counter + 1
         ElseIf (flagSubjectMatch) Then
             'tags included subject cell - color grey
             ActiveSheet.Cells(i, filterColumn).value = "3"
@@ -112,6 +116,9 @@ Sub EmphasizeSimilar()
     
     'Filter relevant match - Think if i want it
     'ActiveSheet.ListObjects("Concepts").Range.AutoFilter Field:=11, Criteria1:="1"
+    
+    'Save quantity of connections to current selected row
+    ActiveSheet.Cells(currentRow, quantityColumn).value = counter
     
     'Sort Data
     ActiveSheet.ListObjects(tableName).Sort.SortFields.Clear
