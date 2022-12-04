@@ -9,14 +9,8 @@ Sub EmphasizeSimilar()
     Application.ScreenUpdating = False
     
     'Constants
-    Const tableName As String = "Knowledge"
-    Const startingRow As Integer = 7
     Const tagColumn As String = "H"
-    Const filterColumn = "I"
     Const subjectColumn = "D"
-    Const lockColumn = "J"
-    Const dateColumn = "K"
-    Const quantityColumn = "L"
     Const previousSelectedRowCellAddress = "D2"
     Const colorStartColumn As String = "A"
     Const colorEndColumn As String = "J"
@@ -24,8 +18,13 @@ Sub EmphasizeSimilar()
     Const boldEndColumn = "E"
     
     'Declare variables
+    Dim startingRow As Integer
     Dim currentRow As Integer
     Dim lastRow As Long
+    Dim filterColumn As Integer
+    Dim lockColumn As Integer
+    Dim dateColumn As Integer
+    Dim connectiosColumn As Integer
     Dim tagList As String
     Dim tagArray() As String
     Dim flagTagMatch As Boolean
@@ -34,7 +33,16 @@ Sub EmphasizeSimilar()
     Dim previousSelectedSubject As String
     Dim todayDate As Date
     Dim counter As Integer
+    Dim tableName As String
     Dim i As Long
+    
+    'Assign variables based on current excel file
+    tableName = ActiveSheet.ListObjects(1).Name
+    startingRow = ActiveSheet.ListObjects(1).Range.Cells(1, 1).row + 1
+    filterColumn = ActiveSheet.ListObjects(1).ListColumns("Filter").Range.Column
+    lockColumn = ActiveSheet.ListObjects(1).ListColumns("Lock").Range.Column
+    dateColumn = ActiveSheet.ListObjects(1).ListColumns("Date").Range.Column
+    connectionsColumn = ActiveSheet.ListObjects(1).ListColumns("Connections").Range.Column
     
     'Validate selected row in valid range
     currentRow = ActiveCell.row
@@ -55,6 +63,7 @@ Sub EmphasizeSimilar()
     Debug.Print ("tag list from current row: " & tagList)
     Debug.Print ("Current selected subject: " & currentSubject)
     Debug.Print ("Previous selected subject: " & previousSelectedSubject)
+    Debug.Print (ActiveSheet.ListObjects(1).ListColumns("Filter").Range.Column)
     ActiveSheet.Range(previousSelectedRowCellAddress).value = currentSubject
     
     'Set bold and colors to default for all rows
@@ -118,7 +127,7 @@ Sub EmphasizeSimilar()
     'ActiveSheet.ListObjects("Concepts").Range.AutoFilter Field:=11, Criteria1:="1"
     
     'Save quantity of connections to current selected row
-    ActiveSheet.Cells(currentRow, quantityColumn).value = counter
+    ActiveSheet.Cells(currentRow, connectionsColumn).value = counter
     
     'Sort Data
     ActiveSheet.ListObjects(tableName).Sort.SortFields.Clear
