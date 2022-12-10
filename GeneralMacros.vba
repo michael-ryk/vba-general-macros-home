@@ -54,6 +54,10 @@ Sub EmphasizeSimilar()
         Exit Sub
     End If
     
+    'Clear filter if applied
+    On Error Resume Next
+    ActiveSheet.ShowAllData
+    
     tagList = Cells(currentRow, tagColumn)
     tagArray = Split(tagList, " ")
     previousSelectedSubject = ActiveSheet.Range(previousSelectedRowCellAddress).Value
