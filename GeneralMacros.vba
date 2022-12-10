@@ -1,6 +1,6 @@
 Sub EmphasizeSimilar()
     ' ==========================================================================
-    ' Version: v1.0
+    ' Version: v2.0
     ' Description: Emphasize rows with similar tags and gray out all remaining
     ' Excel where used: My code write repeat
     ' ==========================================================================
@@ -9,11 +9,7 @@ Sub EmphasizeSimilar()
     Application.ScreenUpdating = False
     
     'Constants
-    Const startingRow As Integer = 7
-    Const tagColumn As String = "H"
-    Const filterColumn = "I"
     Const subjectColumn = "D"
-    Const lockColumn = "J"
     Const previousSelectedRowCellAddress = "D2"
     Const colorStartColumn As String = "A"
     Const colorEndColumn As String = "J"
@@ -21,29 +17,58 @@ Sub EmphasizeSimilar()
     Const boldEndColumn = "E"
     
     'Declare variables
+    Dim startingRow As Integer
     Dim currentRow As Integer
     Dim lastRow As Long
+    Dim filterColumn As Integer
+    Dim lockColumn As Integer
+    Dim dateColumn As Integer
+    Dim connectiosColumn As Integer
+    Dim tagColumn As Integer
     Dim tagList As String
     Dim tagArray() As String
     Dim flagTagMatch As Boolean
     Dim flagSubjectMatch As Boolean
     Dim currentSubject As String
     Dim previousSelectedSubject As String
+    Dim todayDate As Date
+    Dim counter As Integer
+    Dim tableName As String
     Dim i As Long
+    
+    'Assign variables based on current excel file
+    tableName = ActiveSheet.ListObjects(1).Name
+    startingRow = ActiveSheet.ListObjects(1).Range.Cells(1, 1).Row + 1
+    filterColumn = ActiveSheet.ListObjects(1).ListColumns("Filter").Range.Column
+    lockColumn = ActiveSheet.ListObjects(1).ListColumns("Lock").Range.Column
+    dateColumn = ActiveSheet.ListObjects(1).ListColumns("Date").Range.Column
+    connectionsColumn = ActiveSheet.ListObjects(1).ListColumns("Connections").Range.Column
+    tagColumn = ActiveSheet.ListObjects(1).ListColumns("Tags").Range.Column
     
     'Validate selected row in valid range
     currentRow = ActiveCell.Row
-    If (currentRow < startingRow) Then Exit Sub
-    
     lastRow = ActiveSheet.Range("A" & Rows.Count).End(xlUp).Row
+    If (currentRow < startingRow) Then
+        ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
+        ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.Color = RGB(56, 56, 56)
+        Exit Sub
+    End If
+    
+    'Clear filter if applied
+    On Error Resume Next
+    ActiveSheet.ShowAllData
+    
     tagList = Cells(currentRow, tagColumn)
     tagArray = Split(tagList, " ")
     previousSelectedSubject = ActiveSheet.Range(previousSelectedRowCellAddress).Value
     currentSubject = ActiveSheet.Cells(currentRow, subjectColumn).Value
+    todayDate = Date
+    counter = 0
     'Debug.Print ("Current selected row: " & currentRow)
     Debug.Print ("tag list from current row: " & tagList)
     Debug.Print ("Current selected subject: " & currentSubject)
     Debug.Print ("Previous selected subject: " & previousSelectedSubject)
+    Debug.Print (ActiveSheet.ListObjects(1).ListColumns("Filter").Range.Column)
     ActiveSheet.Range(previousSelectedRowCellAddress).Value = currentSubject
     
     'Set bold and colors to default for all rows
@@ -62,7 +87,7 @@ Sub EmphasizeSimilar()
                 flagTagMatch = True
             End If
             'Mark row which have at least one keyword from tag section in subject
-            If InStr(1, Cells(i, "F").Value, Item) Then
+            If InStr(1, Cells(i, subjectColumn).Value, Item) Then
                 flagSubjectMatch = True
             End If
         Next Item
@@ -72,6 +97,7 @@ Sub EmphasizeSimilar()
             'Tags matched in tags cell - color black + bold
             ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
             ActiveSheet.Cells(i, filterColumn).Value = "2"
+            counter = counter + 1
         ElseIf (flagSubjectMatch) Then
             'tags included subject cell - color grey
             ActiveSheet.Cells(i, filterColumn).Value = "3"
@@ -93,9 +119,10 @@ Sub EmphasizeSimilar()
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(142, 169, 219)
         End If
         
-        'Selected row = 1 to make it first after sorting + color Dark blue
+        'Selected row = 1 to make it first after sorting + color Dark blue + update date
         If (i = currentRow) Then
             ActiveSheet.Cells(i, filterColumn).Value = "1"
+            ActiveSheet.Cells(i, dateColumn).Value = todayDate
             ActiveSheet.Range(Cells(currentRow, colorStartColumn), Cells(currentRow, colorEndColumn)).Font.Color = RGB(48, 84, 150)
         End If
         
@@ -104,12 +131,15 @@ Sub EmphasizeSimilar()
     'Filter relevant match - Think if i want it
     'ActiveSheet.ListObjects("Concepts").Range.AutoFilter Field:=11, Criteria1:="1"
     
+    'Save quantity of connections to current selected row
+    ActiveSheet.Cells(currentRow, connectionsColumn).Value = counter
+    
     'Sort Data
-    ActiveSheet.ListObjects("Concepts").Sort.SortFields.Clear
-    ActiveSheet.ListObjects("Concepts").Sort.SortFields. _
-        Add2 Key:=Range("Concepts[[#All],[Filter]]"), SortOn:=xlSortOnValues, _
+    ActiveSheet.ListObjects(tableName).Sort.SortFields.Clear
+    ActiveSheet.ListObjects(tableName).Sort.SortFields. _
+        Add2 Key:=Range(tableName & "[[#All],[Filter]]"), SortOn:=xlSortOnValues, _
         Order:=xlAscending, DataOption:=xlSortNormal
-    With ActiveSheet.ListObjects("Concepts").Sort
+    With ActiveSheet.ListObjects(tableName).Sort
         .Header = xlYes
         .MatchCase = False
         .Orientation = xlTopToBottom
