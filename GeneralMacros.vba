@@ -10,7 +10,9 @@ Sub EmphasizeSimilar()
     
     'Constants
     Const subjectColumn = "D"
-    Const previousSelectedRowCellAddress = "D2"
+    Const SavedAsideSubjectCellAddress = "D2"
+    Const SavedAsideTagsCellAddress = "D3"
+    Const SavedAsideLocationCellAddress = "D4"
     Const colorStartColumn As String = "A"
     Const colorEndColumn As String = "J"
     Const boldStartColumn = "D"
@@ -20,6 +22,7 @@ Sub EmphasizeSimilar()
     Dim startingRow As Integer
     Dim currentRow As Integer
     Dim lastRow As Long
+    Dim locationCulmn As String
     Dim filterColumn As Integer
     Dim lockColumn As Integer
     Dim dateColumn As Integer
@@ -44,6 +47,7 @@ Sub EmphasizeSimilar()
     dateColumn = ActiveSheet.ListObjects(1).ListColumns("Date").Range.Column
     connectionsColumn = ActiveSheet.ListObjects(1).ListColumns("Connections").Range.Column
     tagColumn = ActiveSheet.ListObjects(1).ListColumns("Tags").Range.Column
+    locationColumn = ActiveSheet.ListObjects(1).ListColumns("Location").Range.Column
     
     'Validate selected row in valid range
     currentRow = ActiveCell.Row
@@ -60,7 +64,7 @@ Sub EmphasizeSimilar()
     
     tagList = Cells(currentRow, tagColumn)
     tagArray = Split(tagList, " ")
-    previousSelectedSubject = ActiveSheet.Range(previousSelectedRowCellAddress).Value
+    previousSelectedSubject = ActiveSheet.Range(SavedAsideSubjectCellAddress).Value
     currentSubject = ActiveSheet.Cells(currentRow, subjectColumn).Value
     todayDate = Date
     counter = 0
@@ -69,7 +73,10 @@ Sub EmphasizeSimilar()
     Debug.Print ("Current selected subject: " & currentSubject)
     Debug.Print ("Previous selected subject: " & previousSelectedSubject)
     Debug.Print (ActiveSheet.ListObjects(1).ListColumns("Filter").Range.Column)
-    ActiveSheet.Range(previousSelectedRowCellAddress).Value = currentSubject
+    ActiveSheet.Range(SavedAsideSubjectCellAddress).Value = currentSubject
+    ActiveSheet.Range(SavedAsideTagsCellAddress).Value = ActiveSheet.Cells(currentRow, tagColumn).Value
+    ActiveSheet.Range(SavedAsideLocationCellAddress).Value = ActiveSheet.Cells(currentRow, locationColumn).Value
+    
     
     'Set bold and colors to default for all rows
     ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
