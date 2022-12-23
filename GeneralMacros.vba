@@ -63,21 +63,24 @@ Sub EmphasizeSimilar()
     On Error Resume Next
     ActiveSheet.ShowAllData
     
+    'Init variables
     tagList = Cells(currentRow, tagColumn)
     selectedRowTagArray = Split(tagList, " ")
-    previousSelectedSubject = ActiveSheet.Range(SavedAsideSubjectCellAddress).Value
     currentSubject = ActiveSheet.Cells(currentRow, subjectColumn).Value
+    previousSelectedSubject = ActiveSheet.Range(SavedAsideSubjectCellAddress).Value
     todayDate = Date
     numberOfConnections = 0
-    'Debug.Print ("Current selected row: " & currentRow)
+    
+    'Debug Prints
     Debug.Print ("tag list from current row: " & tagList)
     Debug.Print ("Current selected subject: " & currentSubject)
     Debug.Print ("Previous selected subject: " & previousSelectedSubject)
     Debug.Print (ActiveSheet.ListObjects(1).ListColumns("Filter").Range.Column)
+    
+    'Save current selection to excel for next execution
     ActiveSheet.Range(SavedAsideSubjectCellAddress).Value = currentSubject
     ActiveSheet.Range(SavedAsideTagsCellAddress).Value = ActiveSheet.Cells(currentRow, tagColumn).Value
     ActiveSheet.Range(SavedAsideLocationCellAddress).Value = ActiveSheet.Cells(currentRow, locationColumn).Value
-    
     
     'Set bold and colors to default for all rows
     ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
@@ -89,7 +92,6 @@ Sub EmphasizeSimilar()
         flagTagMatch = False
         flagSubjectMatch = False
         targetRowTagArray = Split(Cells(i, tagColumn), " ")
-        Debug.Print ("Row: " & i)
         
         For Each selectedTag In selectedRowTagArray
             
