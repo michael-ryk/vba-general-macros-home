@@ -36,7 +36,7 @@ Sub EmphasizeSimilar()
     Dim currentSubject As String
     Dim previousSelectedSubject As String
     Dim todayDate As Date
-    Dim counter As Integer
+    Dim numberOfConnections As Integer
     Dim tableName As String
     Dim i As Long
     
@@ -68,7 +68,7 @@ Sub EmphasizeSimilar()
     previousSelectedSubject = ActiveSheet.Range(SavedAsideSubjectCellAddress).Value
     currentSubject = ActiveSheet.Cells(currentRow, subjectColumn).Value
     todayDate = Date
-    counter = 0
+    numberOfConnections = 0
     'Debug.Print ("Current selected row: " & currentRow)
     Debug.Print ("tag list from current row: " & tagList)
     Debug.Print ("Current selected subject: " & currentSubject)
@@ -110,7 +110,7 @@ Sub EmphasizeSimilar()
             'Tags matched in tags cell - color black + bold
             ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
             ActiveSheet.Cells(i, filterColumn).Value = "2"
-            counter = counter + 1
+            numberOfConnections = numberOfConnections + 1
         ElseIf (flagSubjectMatch) Then
             'tags included subject cell - color grey
             ActiveSheet.Cells(i, filterColumn).Value = "3"
@@ -145,7 +145,7 @@ Sub EmphasizeSimilar()
     'ActiveSheet.ListObjects("Concepts").Range.AutoFilter Field:=11, Criteria1:="1"
     
     'Save quantity of connections to current selected row
-    ActiveSheet.Cells(currentRow, connectionsColumn).Value = counter
+    ActiveSheet.Cells(currentRow, connectionsColumn).Value = numberOfConnections
     
     'Sort Data
     ActiveSheet.ListObjects(tableName).Sort.SortFields.Clear
