@@ -109,19 +109,19 @@ Sub EmphasizeSimilar()
         If (flagTagMatch) Then
             'Tags matched in tags cell - color black + bold
             ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
-            ActiveSheet.Cells(i, filterColumn).Value = "2"
             numberOfConnections = numberOfConnections + 1
+            ActiveSheet.Cells(i, filterColumn).Value = "2"
         ElseIf (flagSubjectMatch) Then
             'tags included subject cell - color grey
-            ActiveSheet.Cells(i, filterColumn).Value = "3"
+            ActiveSheet.Cells(i, filterColumn).Value = "A-Sugest"
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(128, 128, 128)
         Else
             'All remained rows - very light grey
-            ActiveSheet.Cells(i, filterColumn).Value = "4"
+            ActiveSheet.Cells(i, filterColumn).Value = "B-Others"
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(217, 217, 217)
         End If
         
-        'Set lock rows before active row + color green
+        'Lock rows have highest priority of sorting above current row + color green
         If (ActiveSheet.Cells(i, lockColumn).Value = "yes") Then
             ActiveSheet.Cells(i, filterColumn).Value = "0"
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(0, 176, 80)
@@ -132,7 +132,7 @@ Sub EmphasizeSimilar()
             ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(142, 169, 219)
         End If
         
-        'Selected row = 1 to make it first after sorting + color Dark blue + update date
+        'Selected row = 1 to make it before results + color Dark blue + update date
         If (i = currentRow) Then
             ActiveSheet.Cells(i, filterColumn).Value = "1"
             ActiveSheet.Cells(i, dateColumn).Value = todayDate
