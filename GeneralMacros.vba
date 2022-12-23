@@ -29,7 +29,8 @@ Sub EmphasizeSimilar()
     Dim connectiosColumn As Integer
     Dim tagColumn As Integer
     Dim tagList As String
-    Dim tagArray() As String
+    Dim selectedRowTagArray() As String
+    Dim targetRowTagArray() As String
     Dim flagTagMatch As Boolean
     Dim flagSubjectMatch As Boolean
     Dim currentSubject As String
@@ -63,7 +64,7 @@ Sub EmphasizeSimilar()
     ActiveSheet.ShowAllData
     
     tagList = Cells(currentRow, tagColumn)
-    tagArray = Split(tagList, " ")
+    selectedRowTagArray = Split(tagList, " ")
     previousSelectedSubject = ActiveSheet.Range(SavedAsideSubjectCellAddress).Value
     currentSubject = ActiveSheet.Cells(currentRow, subjectColumn).Value
     todayDate = Date
@@ -87,17 +88,22 @@ Sub EmphasizeSimilar()
         
         flagTagMatch = False
         flagSubjectMatch = False
+        targetRowTagArray = Split(Cells(i, tagColumn), " ")
+        Debug.Print ("Row: " & i)
         
-        For Each Item In tagArray
+        For Each selectedTag In selectedRowTagArray
+            
             'Mark row which have one tag which included in selected row
-            If InStr(1, Cells(i, tagColumn).Value, Item) Then
-                flagTagMatch = True
-            End If
+            For Each targetTag In targetRowTagArray
+                If (selectedTag = targetTag) Then flagTagMatch = True
+            Next targetTag
+            
             'Mark row which have at least one keyword from tag section in subject
-            If InStr(1, Cells(i, subjectColumn).Value, Item) Then
+            If InStr(1, Cells(i, subjectColumn).Value, selectedTag) Then
                 flagSubjectMatch = True
             End If
-        Next Item
+            
+        Next selectedTag
         
         'Set row filter result value for future sorting
         If (flagTagMatch) Then
