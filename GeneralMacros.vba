@@ -96,9 +96,11 @@ Sub EmphasizeSimilar()
         For Each selectedTag In selectedRowTagArray
             
             'Mark row which have one tag which included in selected row
-            For Each targetTag In targetRowTagArray
-                If (selectedTag = targetTag) Then flagTagMatch = True
-            Next targetTag
+            If Not (flagTagMatch) Then
+                For Each targetTag In targetRowTagArray
+                    If (selectedTag = targetTag) Then flagTagMatch = True
+                Next targetTag
+            End If
             
             'Mark row which have at least one keyword from tag section in subject
             If InStr(1, Cells(i, subjectColumn).Value, selectedTag) Then
@@ -111,8 +113,8 @@ Sub EmphasizeSimilar()
         If (flagTagMatch) Then
             'Tags matched in tags cell - color black + bold
             ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
-            numberOfConnections = numberOfConnections + 1
             ActiveSheet.Cells(i, filterColumn).Value = "2"
+            numberOfConnections = numberOfConnections + 1
         ElseIf (flagSubjectMatch) Then
             'tags included subject cell - color grey
             ActiveSheet.Cells(i, filterColumn).Value = "A-Sugest"
