@@ -39,6 +39,7 @@ Sub EmphasizeSimilar()
     Dim numberOfConnections As Integer
     Dim tableName As String
     Dim i As Long
+    Dim tagIndex As Integer
     
     'Assign variables based on current excel file
     tableName = ActiveSheet.ListObjects(1).Name
@@ -89,6 +90,7 @@ Sub EmphasizeSimilar()
     '=== Main Loop ===
     For i = startingRow To lastRow
         
+        tagIndex = 2
         flagTagMatch = False
         flagSubjectMatch = False
         targetRowTagArray = Split(Cells(i, tagColumn), " ")
@@ -96,14 +98,22 @@ Sub EmphasizeSimilar()
         For Each selectedTag In selectedRowTagArray
             
             'Mark row which have one tag which included in selected row
-            For Each targetTag In targetRowTagArray
-                If (selectedTag = targetTag) Then flagTagMatch = True
-            Next targetTag
+            If Not (flagTagMatch) Then
+                For Each targetTag In targetRowTagArray
+                    If (selectedTag = targetTag) Then
+                        flagTagMatch = True
+                        ActiveSheet.Cells(i, filterColumn).Value = tagIndex & "_" & targetTag
+                        Exit For
+                    End If
+                Next targetTag
+            End If
             
             'Mark row which have at least one keyword from tag section in subject
             If InStr(1, Cells(i, subjectColumn).Value, selectedTag) Then
                 flagSubjectMatch = True
             End If
+            
+            tagIndex = tagIndex + 1
             
         Next selectedTag
         
@@ -112,7 +122,6 @@ Sub EmphasizeSimilar()
             'Tags matched in tags cell - color black + bold
             ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
             numberOfConnections = numberOfConnections + 1
-            ActiveSheet.Cells(i, filterColumn).Value = "2"
         ElseIf (flagSubjectMatch) Then
             'tags included subject cell - color grey
             ActiveSheet.Cells(i, filterColumn).Value = "A-Sugest"
@@ -120,7 +129,7 @@ Sub EmphasizeSimilar()
         Else
             'All remained rows - very light grey
             ActiveSheet.Cells(i, filterColumn).Value = "B-Others"
-            ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(217, 217, 217)
+            ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(190, 190, 190)
         End If
         
         'Lock rows have highest priority of sorting above current row + color green
@@ -136,7 +145,7 @@ Sub EmphasizeSimilar()
         
         'Selected row = 1 to make it before results + color Dark blue + update date
         If (i = currentRow) Then
-            ActiveSheet.Cells(i, filterColumn).Value = "1"
+            ActiveSheet.Cells(i, filterColumn).Value = "1_MAIN"
             ActiveSheet.Cells(i, dateColumn).Value = todayDate
             ActiveSheet.Range(Cells(currentRow, colorStartColumn), Cells(currentRow, colorEndColumn)).Font.Color = RGB(48, 84, 150)
         End If
