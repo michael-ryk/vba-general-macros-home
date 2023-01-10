@@ -163,9 +163,8 @@ Sub EmphasizeSimilar()
     ActiveSheet.Cells(currentRow, connectionsColumn).Value = numberOfConnections
     
     'Filter all matches and blank lines
-    ActiveSheet.ListObjects(tableName).Range.AutoFilter Field:=12, _
-        Criteria1:="Match", Operator:=xlOr, _
-        Criteria2:="Main"
+    ActiveSheet.ListObjects(tableName).Range.AutoFilter Field:=12, Operator:=xlFilterValues, _
+        Criteria1:=Array("", "Main", "Match", "Sugest")
     'TO DO - Make field dynamic if this column in different place
         
     'Restore initial settings
