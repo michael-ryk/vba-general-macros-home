@@ -44,7 +44,7 @@ Sub EmphasizeSimilar()
     
     'Assign variables based on current excel file
     tableName = ActiveSheet.ListObjects(1).Name
-    startingRow = ActiveSheet.ListObjects(1).Range.Cells(1, 1).Row + 1
+    startingRow = ActiveSheet.ListObjects(1).Range.Cells(1, 1).row + 1
     filterColumn = ActiveSheet.ListObjects(1).ListColumns("Filter").Range.Column
     lockColumn = ActiveSheet.ListObjects(1).ListColumns("Lock").Range.Column
     dateColumn = ActiveSheet.ListObjects(1).ListColumns("Date").Range.Column
@@ -57,11 +57,11 @@ Sub EmphasizeSimilar()
     ActiveSheet.ListObjects(tableName).AutoFilter.ShowAllData
     
     'Validate selected row in valid range
-    currentRow = ActiveCell.Row
-    lastRow = ActiveSheet.Range("A" & Rows.Count).End(xlUp).Row
+    currentRow = ActiveCell.row
+    lastRow = ActiveSheet.Range("A" & Rows.Count).End(xlUp).row
     If (currentRow < startingRow) Then
         ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
-        ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.Color = RGB(56, 56, 56)
+        ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.color = RGB(56, 56, 56)
         Exit Sub
     End If
         
@@ -130,29 +130,29 @@ Sub EmphasizeSimilar()
             ElseIf (flagSubjectMatch) Then
                 'tags included subject cell - color grey
                 ActiveSheet.Cells(i, filterColumn).Value = "Sugest"
-                ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(128, 128, 128)
+                Call colorRow(i, colorStartColumn, colorEndColumn, RGB(128, 128, 128))
             Else
                 'All remained rows - very light grey
                 ActiveSheet.Cells(i, filterColumn).Value = "Others"
-                ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(190, 190, 190)
+                Call colorRow(i, colorStartColumn, colorEndColumn, RGB(190, 190, 190))
             End If
             
             'Lock rows have highest priority of sorting above current row + color green
             If (ActiveSheet.Cells(i, lockColumn).Value = "yes") Then
                 ActiveSheet.Cells(i, filterColumn).Value = "0"
-                ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(0, 176, 80)
+                Call colorRow(i, colorStartColumn, colorEndColumn, RGB(0, 176, 80))
             End If
             
             'Color previous row - light blue
             If (ActiveSheet.Cells(i, subjectColumn) = previousSelectedSubject) Then
-                ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(142, 169, 219)
+                Call colorRow(i, colorStartColumn, colorEndColumn, RGB(142, 169, 219))
             End If
             
             'Selected row = 1 to make it before results + color Dark blue + update date
             If (i = currentRow) Then
                 ActiveSheet.Cells(i, filterColumn).Value = "Main"
                 ActiveSheet.Cells(i, dateColumn).Value = todayDate
-                ActiveSheet.Range(Cells(currentRow, colorStartColumn), Cells(currentRow, colorEndColumn)).Font.Color = RGB(48, 84, 150)
+                Call colorRow(i, colorStartColumn, colorEndColumn, RGB(48, 84, 150))
             End If
             
         End If
@@ -171,3 +171,8 @@ Sub EmphasizeSimilar()
     Application.ScreenUpdating = True
 
 End Sub
+
+Function colorRow(row As Long, startCol As String, endCol As String, rgbColor As Long)
+    Debug.Print ("color: " & rgbColor)
+    ActiveSheet.Range(Cells(row, startCol), Cells(row, endCol)).Font.color = rgbColor
+End Function
