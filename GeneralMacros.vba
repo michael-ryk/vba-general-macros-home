@@ -9,14 +9,11 @@ Sub EmphasizeSimilar()
     Application.ScreenUpdating = False
     
     'Constants
-    Const subjectColumn = "D"
     Const SavedAsideSubjectCellAddress = "D2"
     Const SavedAsideTagsCellAddress = "D3"
     Const SavedAsideLocationCellAddress = "D4"
     Const colorStartColumn As String = "A"
     Const colorEndColumn As String = "J"
-    Const boldStartColumn = "D"
-    Const boldEndColumn = "E"
     
     'Declare variables
     Dim startingRow As Integer
@@ -28,6 +25,7 @@ Sub EmphasizeSimilar()
     Dim dateColumn As Integer
     Dim connectiosColumn As Integer
     Dim tagColumn As Integer
+    Dim subjectColumn As Integer
     Dim tagList As String
     Dim selectedRowTagArray() As String
     Dim targetRowTagArray() As String
@@ -51,6 +49,7 @@ Sub EmphasizeSimilar()
     connectionsColumn = ActiveSheet.ListObjects(1).ListColumns("Connections").Range.Column
     tagColumn = ActiveSheet.ListObjects(1).ListColumns("Tags").Range.Column
     locationColumn = ActiveSheet.ListObjects(1).ListColumns("Location").Range.Column
+    subjectColumn = ActiveSheet.ListObjects(1).ListColumns("Subject").Range.Column
     
     'Clear filter if applied
     On Error Resume Next
@@ -59,9 +58,9 @@ Sub EmphasizeSimilar()
     'Validate selected row in valid range
     currentRow = ActiveCell.row
     lastRow = ActiveSheet.Range("A" & Rows.Count).End(xlUp).row
+    
     If (currentRow < startingRow) Then
-        ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
-        ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.color = RGB(56, 56, 56)
+        Call ClearFocus(startingRow, lastRow, subjectColumn, tagColumn)
         Exit Sub
     End If
         
@@ -124,7 +123,7 @@ Sub EmphasizeSimilar()
             'Set row filter result value for future sorting
             If (flagTagMatch) Then
                 'Tags matched in tags cell - color black + bold
-                ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
+                ActiveSheet.Range(Cells(i, subjectColumn), Cells(i, subjectColumn)).Font.Bold = True
                 ActiveSheet.Cells(i, filterColumn).Value = "Match"
                 numberOfConnections = numberOfConnections + 1
             ElseIf (flagSubjectMatch) Then
@@ -175,3 +174,9 @@ End Sub
 Function colorRow(row As Long, startCol As String, endCol As String, rgbColor As Long)
     ActiveSheet.Range(Cells(row, startCol), Cells(row, endCol)).Font.color = rgbColor
 End Function
+
+Sub ClearFocus(startRow As Integer, endRow As Long, subjectColumn As Integer, endColumn As Integer)
+'Clear filter and make all rows with same style
+    ActiveSheet.Range(Cells(startRow, subjectColumn), Cells(endRow, subjectColumn)).Font.Bold = False
+    ActiveSheet.Range(Cells(startRow, "A"), Cells(endRow, endColumn)).Font.color = RGB(56, 56, 56)
+End Sub
