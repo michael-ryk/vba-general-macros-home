@@ -173,6 +173,5 @@ Sub EmphasizeSimilar()
 End Sub
 
 Function colorRow(row As Long, startCol As String, endCol As String, rgbColor As Long)
-    Debug.Print ("color: " & rgbColor)
     ActiveSheet.Range(Cells(row, startCol), Cells(row, endCol)).Font.color = rgbColor
 End Function
