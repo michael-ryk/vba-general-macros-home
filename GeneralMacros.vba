@@ -52,6 +52,10 @@ Sub EmphasizeSimilar()
     tagColumn = ActiveSheet.ListObjects(1).ListColumns("Tags").Range.Column
     locationColumn = ActiveSheet.ListObjects(1).ListColumns("Location").Range.Column
     
+    'Clear filter if applied
+    On Error Resume Next
+    ActiveSheet.ListObjects(tableName).AutoFilter.ShowAllData
+    
     'Validate selected row in valid range
     currentRow = ActiveCell.Row
     lastRow = ActiveSheet.Range("A" & Rows.Count).End(xlUp).Row
@@ -60,11 +64,7 @@ Sub EmphasizeSimilar()
         ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.Color = RGB(56, 56, 56)
         Exit Sub
     End If
-    
-    'Clear filter if applied
-    On Error Resume Next
-    ActiveSheet.ShowAllData
-    
+        
     'Init variables
     tagList = Cells(currentRow, tagColumn)
     selectedRowTagArray = Split(tagList, " ")
@@ -107,7 +107,6 @@ Sub EmphasizeSimilar()
                     For Each targetTag In targetRowTagArray
                         If (selectedTag = targetTag) Then
                             flagTagMatch = True
-                            ActiveSheet.Cells(i, filterColumn).Value = tagIndex & "_" & targetTag
                             Exit For
                         End If
                     Next targetTag
@@ -126,14 +125,15 @@ Sub EmphasizeSimilar()
             If (flagTagMatch) Then
                 'Tags matched in tags cell - color black + bold
                 ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
+                ActiveSheet.Cells(i, filterColumn).Value = "Match"
                 numberOfConnections = numberOfConnections + 1
             ElseIf (flagSubjectMatch) Then
                 'tags included subject cell - color grey
-                ActiveSheet.Cells(i, filterColumn).Value = "A-Sugest"
+                ActiveSheet.Cells(i, filterColumn).Value = "Sugest"
                 ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(128, 128, 128)
             Else
                 'All remained rows - very light grey
-                ActiveSheet.Cells(i, filterColumn).Value = "B-Others"
+                ActiveSheet.Cells(i, filterColumn).Value = "Others"
                 ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(190, 190, 190)
             End If
             
@@ -150,7 +150,7 @@ Sub EmphasizeSimilar()
             
             'Selected row = 1 to make it before results + color Dark blue + update date
             If (i = currentRow) Then
-                ActiveSheet.Cells(i, filterColumn).Value = "1_MAIN"
+                ActiveSheet.Cells(i, filterColumn).Value = "Main"
                 ActiveSheet.Cells(i, dateColumn).Value = todayDate
                 ActiveSheet.Range(Cells(currentRow, colorStartColumn), Cells(currentRow, colorEndColumn)).Font.Color = RGB(48, 84, 150)
             End If
@@ -163,7 +163,10 @@ Sub EmphasizeSimilar()
     ActiveSheet.Cells(currentRow, connectionsColumn).Value = numberOfConnections
     
     'Filter all matches and blank lines
-    'ActiveSheet.ListObjects(tableName).Range.AutoFilter Field:=11, Criteria1:="1"
+    ActiveSheet.ListObjects(tableName).Range.AutoFilter Field:=12, _
+        Criteria1:="Match", Operator:=xlOr, _
+        Criteria2:="Main"
+    'TO DO - Make field dynamic if this column in different place
         
     'Restore initial settings
     Application.ScreenUpdating = True
