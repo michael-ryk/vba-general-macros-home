@@ -1,6 +1,6 @@
 Sub EmphasizeSimilar()
     ' ==========================================================================
-    ' Version: v3.0
+    ' Version: v4.0
     ' Description: Emphasize rows with similar tags and gray out all remaining
     ' Excel where used: My code write repeat
     ' ==========================================================================
@@ -40,6 +40,7 @@ Sub EmphasizeSimilar()
     Dim tableName As String
     Dim i As Long
     Dim tagIndex As Integer
+    Dim rowTags As String
     
     'Assign variables based on current excel file
     tableName = ActiveSheet.ListObjects(1).Name
@@ -85,92 +86,85 @@ Sub EmphasizeSimilar()
     
     'Set bold and colors to default for all rows
     ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
-    ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.Color = RGB(56, 56, 56)
+    'ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.Color = RGB(56, 56, 56)
     
     '=== Main Loop ===
     For i = startingRow To lastRow
         
-        tagIndex = 2
-        flagTagMatch = False
-        flagSubjectMatch = False
-        targetRowTagArray = Split(Cells(i, tagColumn), " ")
+        rowTags = Cells(i, tagColumn)
         
-        For Each selectedTag In selectedRowTagArray
+        If (Len(rowTags)) Then
             
-            'Mark row which have one tag which included in selected row
-            If Not (flagTagMatch) Then
-                For Each targetTag In targetRowTagArray
-                    If (selectedTag = targetTag) Then
-                        flagTagMatch = True
-                        ActiveSheet.Cells(i, filterColumn).Value = tagIndex & "_" & targetTag
-                        Exit For
-                    End If
-                Next targetTag
+            tagIndex = 2
+            flagTagMatch = False
+            flagSubjectMatch = False
+            targetRowTagArray = Split(rowTags, " ")
+            
+            For Each selectedTag In selectedRowTagArray
+                
+                'Mark row which have one tag which included in selected row
+                If Not (flagTagMatch) Then
+                    For Each targetTag In targetRowTagArray
+                        If (selectedTag = targetTag) Then
+                            flagTagMatch = True
+                            ActiveSheet.Cells(i, filterColumn).Value = tagIndex & "_" & targetTag
+                            Exit For
+                        End If
+                    Next targetTag
+                End If
+                
+                'Mark row which have at least one keyword from tag section in subject
+                If InStr(1, Cells(i, subjectColumn).Value, selectedTag) Then
+                    flagSubjectMatch = True
+                End If
+                
+                tagIndex = tagIndex + 1
+                
+            Next selectedTag
+            
+            'Set row filter result value for future sorting
+            If (flagTagMatch) Then
+                'Tags matched in tags cell - color black + bold
+                ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
+                numberOfConnections = numberOfConnections + 1
+            ElseIf (flagSubjectMatch) Then
+                'tags included subject cell - color grey
+                ActiveSheet.Cells(i, filterColumn).Value = "A-Sugest"
+                ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(128, 128, 128)
+            Else
+                'All remained rows - very light grey
+                ActiveSheet.Cells(i, filterColumn).Value = "B-Others"
+                ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(190, 190, 190)
             End If
             
-            'Mark row which have at least one keyword from tag section in subject
-            If InStr(1, Cells(i, subjectColumn).Value, selectedTag) Then
-                flagSubjectMatch = True
+            'Lock rows have highest priority of sorting above current row + color green
+            If (ActiveSheet.Cells(i, lockColumn).Value = "yes") Then
+                ActiveSheet.Cells(i, filterColumn).Value = "0"
+                ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(0, 176, 80)
             End If
             
-            tagIndex = tagIndex + 1
+            'Color previous row - light blue
+            If (ActiveSheet.Cells(i, subjectColumn) = previousSelectedSubject) Then
+                ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(142, 169, 219)
+            End If
             
-        Next selectedTag
-        
-        'Set row filter result value for future sorting
-        If (flagTagMatch) Then
-            'Tags matched in tags cell - color black + bold
-            ActiveSheet.Range(Cells(i, boldStartColumn), Cells(i, boldEndColumn)).Font.Bold = True
-            numberOfConnections = numberOfConnections + 1
-        ElseIf (flagSubjectMatch) Then
-            'tags included subject cell - color grey
-            ActiveSheet.Cells(i, filterColumn).Value = "A-Sugest"
-            ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(128, 128, 128)
-        Else
-            'All remained rows - very light grey
-            ActiveSheet.Cells(i, filterColumn).Value = "B-Others"
-            ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(190, 190, 190)
+            'Selected row = 1 to make it before results + color Dark blue + update date
+            If (i = currentRow) Then
+                ActiveSheet.Cells(i, filterColumn).Value = "1_MAIN"
+                ActiveSheet.Cells(i, dateColumn).Value = todayDate
+                ActiveSheet.Range(Cells(currentRow, colorStartColumn), Cells(currentRow, colorEndColumn)).Font.Color = RGB(48, 84, 150)
+            End If
+            
         End If
-        
-        'Lock rows have highest priority of sorting above current row + color green
-        If (ActiveSheet.Cells(i, lockColumn).Value = "yes") Then
-            ActiveSheet.Cells(i, filterColumn).Value = "0"
-            ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(0, 176, 80)
-        End If
-        
-        'Color previous row - light blue
-        If (ActiveSheet.Cells(i, subjectColumn) = previousSelectedSubject) Then
-            ActiveSheet.Range(Cells(i, colorStartColumn), Cells(i, colorEndColumn)).Font.Color = RGB(142, 169, 219)
-        End If
-        
-        'Selected row = 1 to make it before results + color Dark blue + update date
-        If (i = currentRow) Then
-            ActiveSheet.Cells(i, filterColumn).Value = "1_MAIN"
-            ActiveSheet.Cells(i, dateColumn).Value = todayDate
-            ActiveSheet.Range(Cells(currentRow, colorStartColumn), Cells(currentRow, colorEndColumn)).Font.Color = RGB(48, 84, 150)
-        End If
-        
-    Next i
     
-    'Filter relevant match - Think if i want it
-    'ActiveSheet.ListObjects("Concepts").Range.AutoFilter Field:=11, Criteria1:="1"
+    Next i
     
     'Save quantity of connections to current selected row
     ActiveSheet.Cells(currentRow, connectionsColumn).Value = numberOfConnections
     
-    'Sort Data
-    ActiveSheet.ListObjects(tableName).Sort.SortFields.Clear
-    ActiveSheet.ListObjects(tableName).Sort.SortFields. _
-        Add2 Key:=Range(tableName & "[[#All],[Filter]]"), SortOn:=xlSortOnValues, _
-        Order:=xlAscending, DataOption:=xlSortNormal
-    With ActiveSheet.ListObjects(tableName).Sort
-        .Header = xlYes
-        .MatchCase = False
-        .Orientation = xlTopToBottom
-        .SortMethod = xlPinYin
-        .Apply
-    End With
-    
+    'Filter all matches and blank lines
+    'ActiveSheet.ListObjects(tableName).Range.AutoFilter Field:=11, Criteria1:="1"
+        
     'Restore initial settings
     Application.ScreenUpdating = True
 
