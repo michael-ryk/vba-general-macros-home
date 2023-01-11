@@ -8,6 +8,10 @@ Sub EmphasizeSimilar()
     Debug.Print ("================ Start =================")
     Application.ScreenUpdating = False
     
+    '==================================================
+    'Declare variables
+    '==================================================
+    
     'Constants
     Const SavedAsideSubjectCellAddress = "D2"
     Const SavedAsideTagsCellAddress = "D3"
@@ -39,6 +43,10 @@ Sub EmphasizeSimilar()
     Dim i As Long
     Dim tagIndex As Integer
     Dim rowTags As String
+
+    '==================================================
+    'Assign variables
+    '==================================================
     
     'Assign variables based on current excel file
     tableName = ActiveSheet.ListObjects(1).Name
@@ -87,7 +95,10 @@ Sub EmphasizeSimilar()
     ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
     'ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.Color = RGB(56, 56, 56)
     
-    '=== Main Loop ===
+    '==================================================
+    'Cycle through lines
+    '==================================================
+    
     For i = startingRow To lastRow
         
         rowTags = Cells(i, tagColumn)
@@ -98,6 +109,10 @@ Sub EmphasizeSimilar()
             flagTagMatch = False
             flagSubjectMatch = False
             targetRowTagArray = Split(rowTags, " ")
+            
+            '==================================================
+            'Cycle through tags from selected row
+            '==================================================
             
             For Each selectedTag In selectedRowTagArray
                 
@@ -120,7 +135,10 @@ Sub EmphasizeSimilar()
                 
             Next selectedTag
             
+            '==================================================
             'Set row filter result value for future sorting
+            '==================================================
+            
             If (flagTagMatch) Then
                 'Tags matched in tags cell - color black + bold
                 ActiveSheet.Range(Cells(i, subjectColumn), Cells(i, subjectColumn)).Font.Bold = True
@@ -138,7 +156,7 @@ Sub EmphasizeSimilar()
             
             'Lock rows have highest priority of sorting above current row + color green
             If (ActiveSheet.Cells(i, lockColumn).Value = "yes") Then
-                ActiveSheet.Cells(i, filterColumn).Value = "0"
+                ActiveSheet.Cells(i, filterColumn).Value = "Lock"
                 Call colorRow(i, colorStartColumn, colorEndColumn, RGB(0, 176, 80))
             End If
             
@@ -158,12 +176,16 @@ Sub EmphasizeSimilar()
     
     Next i
     
+    '==================================================
+    'Final configs
+    '==================================================
+    
     'Save quantity of connections to current selected row
     ActiveSheet.Cells(currentRow, connectionsColumn).Value = numberOfConnections
     
     'Filter all matches and blank lines
     ActiveSheet.ListObjects(tableName).Range.AutoFilter Field:=filterColumn, Operator:=xlFilterValues, _
-        Criteria1:=Array("", "Main", "Match", "Sugest")
+        Criteria1:=Array("", "Main", "Match", "Sugest", "Lock")
     'TO DO - Make field dynamic if this column in different place
         
     'Restore initial settings
