@@ -62,23 +62,28 @@ Sub EmphasizeSimilar()
     'Clear filter if applied
     On Error Resume Next
     ActiveSheet.ListObjects(tableName).AutoFilter.ShowAllData
-    
-    'Validate selected row in valid range
-    currentRow = ActiveCell.row
-    lastRow = ActiveSheet.Range("A" & Rows.Count).End(xlUp).row
-    
-    If (currentRow < startingRow) Then
-        Call ClearFocus(startingRow, lastRow, subjectColumn, tagColumn)
-        Exit Sub
-    End If
         
     'Init variables
+    currentRow = ActiveCell.row
+    lastRow = ActiveSheet.Range("A" & Rows.Count).End(xlUp).row
     tagList = Cells(currentRow, tagColumn)
     selectedRowTagArray = Split(tagList, " ")
     currentSubject = ActiveSheet.Cells(currentRow, subjectColumn).Value
     previousSelectedSubject = ActiveSheet.Range(SavedAsideSubjectCellAddress).Value
     todayDate = Date
     numberOfConnections = 0
+    
+    'Set bold and colors to default for all rows
+    ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
+    ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.color = RGB(89, 89, 89)
+    
+    'Validate selected row in valid range
+    If (currentRow < startingRow) Then
+        Call ClearFocus(startingRow, lastRow, subjectColumn, tagColumn)
+        Debug.Print ("Selected row is out of range - Exit sub")
+        Exit Sub
+    End If
+    
     
     'Debug Prints
     Debug.Print ("tag list from current row: " & tagList)
@@ -91,9 +96,6 @@ Sub EmphasizeSimilar()
     ActiveSheet.Range(SavedAsideTagsCellAddress).Value = ActiveSheet.Cells(currentRow, tagColumn).Value
     ActiveSheet.Range(SavedAsideLocationCellAddress).Value = ActiveSheet.Cells(currentRow, locationColumn).Value
     
-    'Set bold and colors to default for all rows
-    ActiveSheet.Range(Cells(startingRow, boldStartColumn), Cells(lastRow, colorEndColumn)).Font.Bold = False
-    ActiveSheet.Range(Cells(startingRow, colorStartColumn), Cells(lastRow, colorEndColumn)).Font.color = RGB(56, 56, 56)
     
     '==================================================
     'Cycle through lines
