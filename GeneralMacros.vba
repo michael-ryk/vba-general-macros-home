@@ -64,9 +64,16 @@ Sub EmphasizeSimilar()
     sSelectedRow = ActiveCell.Row
     lRowLastInTable = shtMain.Range("A" & Rows.Count).End(xlUp).Row
     
+    'Set default style for all rows
+    Dim rngStyleApply               As Range
+    Set rngStyleApply = shtMain.Range(Cells(iFirstTableRow, colorStartColumn), Cells(lRowLastInTable, colorEndColumn))
+    With rngStyleApply.Font
+        .Bold = False
+        .color = RGB(56, 56, 56)
+    End With
+    
     'Validate selected row in valid range
     If (sSelectedRow < iFirstTableRow) Then
-        Call ClearFocus(iFirstTableRow, lRowLastInTable, iColSubject, iColTags)
         Exit Sub
     End If
         
@@ -99,14 +106,6 @@ Sub EmphasizeSimilar()
     Debug.Print ("tag list from current row: " & sSelectedTagList)
     Debug.Print ("Current selected subject: " & sSelectedSubject)
     Debug.Print ("Previous selected subject: " & sPreviousSubject)
-    
-    'Set default style for all rows
-    Dim rngStyleApply               As Range
-    Set rngStyleApply = shtMain.Range(Cells(iFirstTableRow, colorStartColumn), Cells(lRowLastInTable, colorEndColumn))
-    With rngStyleApply.Font
-        .Bold = False
-        .color = RGB(56, 56, 56)
-    End With
 
     '==================================================
     'Cycle through lines
@@ -154,38 +153,48 @@ Sub EmphasizeSimilar()
             '==================================================
             'Set row filter result value for future sorting
             '==================================================
+            Dim rngFilter           As Range
+            Dim rngBold             As Range
+            Dim rngLock             As Range
+            Dim rngSubject          As Range
+            Dim rngColorApply       As Range
+            Set rngFilter = shtMain.Cells(lRowIndex, iColFilter)
+            Set rngBold = shtMain.Range(Cells(lRowIndex, iColSubject), Cells(lRowIndex, iColSubject))
+            Set rngLock = shtMain.Cells(lRowIndex, iColLock)
+            Set rngSubject = shtMain.Cells(lRowIndex, iColSubject)
+            Set rngColorApply = shtMain.Range(Cells(lRowIndex, colorStartColumn), Cells(lRowIndex, colorEndColumn))
             
             If (bTagMatch) Then
                 'Tags matched in tags cell - color black + bold
-                shtMain.Range(Cells(lRowIndex, iColSubject), Cells(lRowIndex, iColSubject)).Font.Bold = True
-                shtMain.Cells(lRowIndex, iColFilter).Value = "Match"
+                rngBold.Font.Bold = True
+                rngFilter.Value = "Match"
                 iNumberOfConnections = iNumberOfConnections + 1
             ElseIf (bSubjectMatch) Then
                 'tags included subject cell - color grey
-                shtMain.Cells(lRowIndex, iColFilter).Value = "Sugest"
-                Call colorRow(lRowIndex, colorStartColumn, colorEndColumn, RGB(128, 128, 128))
+                rngFilter.Value = "Sugest"
+                rngColorApply.Font.color = RGB(128, 128, 128)
             Else
                 'All remained rows - very light grey
-                shtMain.Cells(lRowIndex, iColFilter).Value = "Others"
-                Call colorRow(lRowIndex, colorStartColumn, colorEndColumn, RGB(190, 190, 190))
+                rngFilter.Value = "Others"
+                rngColorApply.Font.color = RGB(190, 190, 190)
             End If
             
             'Lock rows have highest priority of sorting above current row + color green
-            If (shtMain.Cells(lRowIndex, iColLock).Value = "yes") Then
-                shtMain.Cells(lRowIndex, iColFilter).Value = "Lock"
-                Call colorRow(lRowIndex, colorStartColumn, colorEndColumn, RGB(0, 176, 80))
+            If (rngLock.Value = "yes") Then
+                rngFilter.Value = "Lock"
+                rngColorApply.Font.color = RGB(0, 176, 80)
             End If
             
             'Color previous row - light blue
-            If (shtMain.Cells(lRowIndex, iColSubject) = sPreviousSubject) Then
-                Call colorRow(lRowIndex, colorStartColumn, colorEndColumn, RGB(142, 169, 219))
+            If (rngSubject.Value = sPreviousSubject) Then
+                rngColorApply.Font.color = RGB(142, 169, 219)
             End If
             
             'Selected row = 1 to make it before results + color Dark blue + update date
             If (lRowIndex = sSelectedRow) Then
-                shtMain.Cells(lRowIndex, iColFilter).Value = "Main"
+                rngFilter.Value = "Main"
                 shtMain.Cells(lRowIndex, iColDate).Value = todayDate
-                Call colorRow(lRowIndex, colorStartColumn, colorEndColumn, RGB(48, 84, 150))
+                rngColorApply.Font.color = RGB(48, 84, 150)
             End If
             
         End If
@@ -207,14 +216,4 @@ Sub EmphasizeSimilar()
     'Restore initial settings
     Application.ScreenUpdating = True
 
-End Sub
-
-Function colorRow(Row As Long, startCol As String, endCol As String, rgbColor As Long)
-    ActiveSheet.Range(Cells(Row, startCol), Cells(Row, endCol)).Font.color = rgbColor
-End Function
-
-Sub ClearFocus(startRow As Integer, endRow As Long, iColSubject As Integer, endColumn As Integer)
-'Clear filter and make all rows with same style
-    ActiveSheet.Range(Cells(startRow, iColSubject), Cells(endRow, iColSubject)).Font.Bold = False
-    ActiveSheet.Range(Cells(startRow, "A"), Cells(endRow, endColumn)).Font.color = RGB(56, 56, 56)
 End Sub
