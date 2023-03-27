@@ -13,20 +13,12 @@ Sub EmphasizeSimilar()
     Dim SecondsElapsed              As Double
     StartTime = Timer
     
-    '==================================================
-    'Constants
-    '==================================================
-    
-    'Constants
+    'Constants - address of cells that are free in excel
     Const addrSavedSubject          As String = "D2"
     Const addrSavedTags             As String = "D3"
     Const addrSavedLocation         As String = "D4"
     Const addrColorColStart         As String = "F1"
     Const addrColorColEnd           As String = "F2"
-    
-    '==================================================
-    'Start
-    '==================================================
     
     Dim wbMain                      As Workbook
     Dim shtMain                     As Worksheet
@@ -37,6 +29,7 @@ Sub EmphasizeSimilar()
     On Error Resume Next
     Set lo = shtMain.ListObjects(1)
     
+    ' Test if Table exist in active sheet
     If lo Is Nothing Then
         MsgBox "Current sheet doesn't have any table", vbExclamation
         Exit Sub
@@ -50,7 +43,7 @@ Sub EmphasizeSimilar()
     Dim iColLocation                As Integer
     Dim iColSubject                 As Integer
     
-    'Get Columns letters based on found headings in table
+    'Get Columns indexes based on found headings in table - All headings must present
     iColFilter = lo.ListColumns("Filter").Range.Column
     iColLock = lo.ListColumns("Lock").Range.Column
     iColDate = lo.ListColumns("Date").Range.Column
@@ -61,7 +54,7 @@ Sub EmphasizeSimilar()
     
     'todo - validate all columns exist in excel
     
-    'Clear filter in case it was alredy applied
+    'Clear autofilter in case it was alredy applied
     On Error Resume Next
     lo.AutoFilter.ShowAllData
     
@@ -85,7 +78,7 @@ Sub EmphasizeSimilar()
         .Color = RGB(56, 56, 56)
     End With
     
-    'Validate selected row in valid range
+    ' If selected row outside of table - stop macro
     If (sSelectedRow < iFirstTableRow) Then
         Exit Sub
     End If
@@ -116,9 +109,9 @@ Sub EmphasizeSimilar()
     rngSavedLocation.Value = shtMain.Cells(sSelectedRow, iColLocation).Value
     
     'Debug Prints
-    Debug.Print ("tag list from current row: " & sSelectedTagList)
-    Debug.Print ("Current selected subject: " & sSelectedSubject)
-    Debug.Print ("Previous selected subject: " & sPreviousSubject)
+    'Debug.Print ("tag list from current row: " & sSelectedTagList)
+    'Debug.Print ("Current selected subject: " & sSelectedSubject)
+    'Debug.Print ("Previous selected subject: " & sPreviousSubject)
 
     '==================================================
     'Cycle through lines
