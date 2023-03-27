@@ -31,7 +31,13 @@ Sub EmphasizeSimilar()
     
     Set wbMain = ThisWorkbook
     Set shtMain = ActiveSheet
+    On Error Resume Next
     Set lo = shtMain.ListObjects(1)
+    
+    If lo Is Nothing Then
+        MsgBox "Current sheet doesn't have any table", vbExclamation
+        Exit Sub
+    End If
     
     Dim iColFilter                  As Integer
     Dim iColLock                    As Integer
@@ -69,7 +75,7 @@ Sub EmphasizeSimilar()
     Set rngStyleApply = shtMain.Range(Cells(iFirstTableRow, colorStartColumn), Cells(lRowLastInTable, colorEndColumn))
     With rngStyleApply.Font
         .Bold = False
-        .color = RGB(56, 56, 56)
+        .Color = RGB(56, 56, 56)
     End With
     
     'Validate selected row in valid range
@@ -172,29 +178,29 @@ Sub EmphasizeSimilar()
             ElseIf (bSubjectMatch) Then
                 'tags included subject cell - color grey
                 rngFilter.Value = "Sugest"
-                rngColorApply.Font.color = RGB(128, 128, 128)
+                rngColorApply.Font.Color = RGB(128, 128, 128)
             Else
                 'All remained rows - very light grey
                 rngFilter.Value = "Others"
-                rngColorApply.Font.color = RGB(190, 190, 190)
+                rngColorApply.Font.Color = RGB(190, 190, 190)
             End If
             
             'Lock rows have highest priority of sorting above current row + color green
             If (rngLock.Value = "yes") Then
                 rngFilter.Value = "Lock"
-                rngColorApply.Font.color = RGB(0, 176, 80)
+                rngColorApply.Font.Color = RGB(0, 176, 80)
             End If
             
             'Color previous row - light blue
             If (rngSubject.Value = sPreviousSubject) Then
-                rngColorApply.Font.color = RGB(142, 169, 219)
+                rngColorApply.Font.Color = RGB(142, 169, 219)
             End If
             
             'Selected row = 1 to make it before results + color Dark blue + update date
             If (lRowIndex = sSelectedRow) Then
                 rngFilter.Value = "Main"
                 shtMain.Cells(lRowIndex, iColDate).Value = todayDate
-                rngColorApply.Font.color = RGB(48, 84, 150)
+                rngColorApply.Font.Color = RGB(48, 84, 150)
             End If
             
         End If
