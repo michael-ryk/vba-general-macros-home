@@ -129,6 +129,7 @@ Sub EmphasizeSimilar()
     Dim rngSubject          As Range
     Dim rngColorApply       As Range
     Dim rngTags             As Range
+    Dim rngFoundTag         As Range
     Dim selectedTag         As Variant
     
     For Each selectedTag In arrSelectedTagList
@@ -149,6 +150,7 @@ Sub EmphasizeSimilar()
             Set rngSubject = shtMain.Cells(lRowIndex, iColSubject)
             Set rngColorApply = shtMain.Range(Cells(lRowIndex, colorStartColumn), Cells(lRowIndex, colorEndColumn))
             Set rngTags = shtMain.Cells(lRowIndex, iColTags)
+            Set rngFoundTag = shtMain.Cells(lRowIndex, iColFoundTag)
             
             sRowTagList = rngTags.Value
             sRowSubject = rngSubject.Value
@@ -161,6 +163,7 @@ Sub EmphasizeSimilar()
                     'Debug.Print ("Selected tag found in list of this row tag - Mark it")
                     rngBold.Font.Bold = True
                     rngFilter.Value = "Match"
+                    rngFoundTag.Value = rngFoundTag.Value & " " & selectedTag
                     rngColorApply.Font.Color = RGB(56, 56, 56)
                     iNumberOfConnections = iNumberOfConnections + 1
                 ElseIf InStr(sRowSubject, selectedTag) > 0 Then
