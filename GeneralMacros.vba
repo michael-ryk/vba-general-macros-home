@@ -57,7 +57,10 @@ Sub EmphasizeSimilar()
     'Clear autofilter in case it was alredy applied
     On Error Resume Next
     lo.AutoFilter.ShowAllData
-    
+        
+    'Clear all contents of Filter column
+    lo.ListColumns("Filter").DataBodyRange.ClearContents
+        
     'Get First and last row index
     Dim iFirstTableRow              As Integer
     Dim lRowLastInTable             As Long
@@ -152,13 +155,13 @@ Sub EmphasizeSimilar()
                 
                 ' Mark Match or Suggest
                 If InStr(sRowTagList, selectedTag) > 0 Then
-                    Debug.Print ("Selected tag found in list of this row tag - Mark it")
+                    'Debug.Print ("Selected tag found in list of this row tag - Mark it")
                     rngBold.Font.Bold = True
                     rngFilter.Value = "Match"
                     rngColorApply.Font.Color = RGB(56, 56, 56)
                     iNumberOfConnections = iNumberOfConnections + 1
                 ElseIf InStr(sRowSubject, selectedTag) > 0 Then
-                    Debug.Print ("Selected tag found in subject - suggest it")
+                    'Debug.Print ("Selected tag found in subject - suggest it")
                     rngFilter.Value = "Sugest"
                     rngColorApply.Font.Color = RGB(128, 128, 128)
                 End If
@@ -196,7 +199,7 @@ Sub EmphasizeSimilar()
     
     'Filter all matches and blank lines
     lo.Range.AutoFilter Field:=iColFilter, Operator:=xlFilterValues, _
-        Criteria1:=Array("", "Main", "Match", "Sugest", "Lock")
+        Criteria1:=Array("Main", "Match", "Sugest", "Lock")
     'TO DO - Make field dynamic if this column in different place
         
     'Restore initial settings
