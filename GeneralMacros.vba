@@ -9,20 +9,23 @@ Sub EmphasizeSimilar()
 
     Debug.Print ("================ Start =================")
     Application.ScreenUpdating = False
+    Dim StartTime                   As Double
+    Dim SecondsElapsed              As Double
+    StartTime = Timer
     
     '==================================================
-    'Declare variables
+    'Constants
     '==================================================
     
     'Constants
-    Const addrSavedSubject = "D2"
-    Const addrSavedTags = "D3"
-    Const addrSavedLocation = "D4"
-    Const colorStartColumn          As String = "A"
-    Const colorEndColumn            As String = "J"
+    Const addrSavedSubject          As String = "D2"
+    Const addrSavedTags             As String = "D3"
+    Const addrSavedLocation         As String = "D4"
+    Const addrColorColStart         As String = "F1"
+    Const addrColorColEnd           As String = "F2"
     
     '==================================================
-    'Assign variables
+    'Start
     '==================================================
     
     Dim wbMain                      As Workbook
@@ -31,7 +34,13 @@ Sub EmphasizeSimilar()
     
     Set wbMain = ThisWorkbook
     Set shtMain = ActiveSheet
+    On Error Resume Next
     Set lo = shtMain.ListObjects(1)
+    
+    If lo Is Nothing Then
+        MsgBox "Current sheet doesn't have any table", vbExclamation
+        Exit Sub
+    End If
     
     Dim iColFilter                  As Integer
     Dim iColLock                    As Integer
@@ -65,11 +74,15 @@ Sub EmphasizeSimilar()
     lRowLastInTable = shtMain.Range("A" & Rows.Count).End(xlUp).Row
     
     'Set default style for all rows
+    Dim colorStartColumn            As String
+    Dim colorEndColumn              As String
     Dim rngStyleApply               As Range
+    colorStartColumn = shtMain.Range(addrColorColStart).Value
+    colorEndColumn = shtMain.Range(addrColorColEnd).Value
     Set rngStyleApply = shtMain.Range(Cells(iFirstTableRow, colorStartColumn), Cells(lRowLastInTable, colorEndColumn))
     With rngStyleApply.Font
         .Bold = False
-        .color = RGB(56, 56, 56)
+        .Color = RGB(56, 56, 56)
     End With
     
     'Validate selected row in valid range
@@ -172,29 +185,29 @@ Sub EmphasizeSimilar()
             ElseIf (bSubjectMatch) Then
                 'tags included subject cell - color grey
                 rngFilter.Value = "Sugest"
-                rngColorApply.Font.color = RGB(128, 128, 128)
+                rngColorApply.Font.Color = RGB(128, 128, 128)
             Else
                 'All remained rows - very light grey
                 rngFilter.Value = "Others"
-                rngColorApply.Font.color = RGB(190, 190, 190)
+                rngColorApply.Font.Color = RGB(190, 190, 190)
             End If
             
             'Lock rows have highest priority of sorting above current row + color green
             If (rngLock.Value = "yes") Then
                 rngFilter.Value = "Lock"
-                rngColorApply.Font.color = RGB(0, 176, 80)
+                rngColorApply.Font.Color = RGB(0, 176, 80)
             End If
             
             'Color previous row - light blue
             If (rngSubject.Value = sPreviousSubject) Then
-                rngColorApply.Font.color = RGB(142, 169, 219)
+                rngColorApply.Font.Color = RGB(142, 169, 219)
             End If
             
             'Selected row = 1 to make it before results + color Dark blue + update date
             If (lRowIndex = sSelectedRow) Then
                 rngFilter.Value = "Main"
                 shtMain.Cells(lRowIndex, iColDate).Value = todayDate
-                rngColorApply.Font.color = RGB(48, 84, 150)
+                rngColorApply.Font.Color = RGB(48, 84, 150)
             End If
             
         End If
@@ -216,4 +229,9 @@ Sub EmphasizeSimilar()
     'Restore initial settings
     Application.ScreenUpdating = True
 
+    'Calculate Macro run time and print it
+    SecondsElapsed = Round(Timer - StartTime, 2)
+    Debug.Print ("Time took to run: " & SecondsElapsed & " sec")
+    Debug.Print ("================ Finish =================")
+    
 End Sub
