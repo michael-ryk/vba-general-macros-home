@@ -42,6 +42,7 @@ Sub EmphasizeSimilar()
     Dim iColTags                    As Integer
     Dim iColLocation                As Integer
     Dim iColSubject                 As Integer
+    Dim iColFoundTag                As Integer
     
     'Get Columns indexes based on found headings in table - All headings must present
     iColFilter = lo.ListColumns("Filter").Range.Column
@@ -51,6 +52,7 @@ Sub EmphasizeSimilar()
     iColTags = lo.ListColumns("Tags").Range.Column
     iColLocation = lo.ListColumns("Location").Range.Column
     iColSubject = lo.ListColumns("Subject").Range.Column
+    iColFoundTag = lo.ListColumns("Found Tag").Range.Column
     
     'todo - validate all columns exist in excel
     
@@ -60,6 +62,7 @@ Sub EmphasizeSimilar()
         
     'Clear all contents of Filter column
     lo.ListColumns("Filter").DataBodyRange.ClearContents
+    lo.ListColumns("Found Tag").DataBodyRange.ClearContents
         
     'Get First and last row index
     Dim iFirstTableRow              As Integer
