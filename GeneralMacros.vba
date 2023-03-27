@@ -18,8 +18,8 @@ Sub EmphasizeSimilar()
     Const addrSavedSubject          As String = "D2"
     Const addrSavedTags             As String = "D3"
     Const addrSavedLocation         As String = "D4"
-    Const colorStartColumn          As String = "A"
-    Const colorEndColumn            As String = "J"
+    Const addrColorColStart         As String = "F1"
+    Const addrColorColEnd           As String = "F2"
     
     '==================================================
     'Assign variables
@@ -71,7 +71,11 @@ Sub EmphasizeSimilar()
     lRowLastInTable = shtMain.Range("A" & Rows.Count).End(xlUp).Row
     
     'Set default style for all rows
+    Dim colorStartColumn            As String
+    Dim colorEndColumn              As String
     Dim rngStyleApply               As Range
+    colorStartColumn = shtMain.Range(addrColorColStart).Value
+    colorEndColumn = shtMain.Range(addrColorColEnd).Value
     Set rngStyleApply = shtMain.Range(Cells(iFirstTableRow, colorStartColumn), Cells(lRowLastInTable, colorEndColumn))
     With rngStyleApply.Font
         .Bold = False
