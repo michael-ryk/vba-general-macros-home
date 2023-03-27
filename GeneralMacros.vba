@@ -9,9 +9,12 @@ Sub EmphasizeSimilar()
 
     Debug.Print ("================ Start =================")
     Application.ScreenUpdating = False
+    Dim StartTime                   As Double
+    Dim SecondsElapsed              As Double
+    StartTime = Timer
     
     '==================================================
-    'Declare variables
+    'Constants
     '==================================================
     
     'Constants
@@ -22,7 +25,7 @@ Sub EmphasizeSimilar()
     Const addrColorColEnd           As String = "F2"
     
     '==================================================
-    'Assign variables
+    'Start
     '==================================================
     
     Dim wbMain                      As Workbook
@@ -226,4 +229,9 @@ Sub EmphasizeSimilar()
     'Restore initial settings
     Application.ScreenUpdating = True
 
+    'Calculate Macro run time and print it
+    SecondsElapsed = Round(Timer - StartTime, 2)
+    Debug.Print ("Time took to run: " & SecondsElapsed & " sec")
+    Debug.Print ("================ Finish =================")
+    
 End Sub
