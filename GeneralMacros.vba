@@ -15,9 +15,9 @@ Sub EmphasizeSimilar()
     '==================================================
     
     'Constants
-    Const addrSavedSubject = "D2"
-    Const addrSavedTags = "D3"
-    Const addrSavedLocation = "D4"
+    Const addrSavedSubject          As String = "D2"
+    Const addrSavedTags             As String = "D3"
+    Const addrSavedLocation         As String = "D4"
     Const colorStartColumn          As String = "A"
     Const colorEndColumn            As String = "J"
     
