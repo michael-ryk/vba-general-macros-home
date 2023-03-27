@@ -13,20 +13,12 @@ Sub EmphasizeSimilar()
     Dim SecondsElapsed              As Double
     StartTime = Timer
     
-    '==================================================
-    'Constants
-    '==================================================
-    
-    'Constants
+    'Constants - address of cells that are free in excel
     Const addrSavedSubject          As String = "D2"
     Const addrSavedTags             As String = "D3"
     Const addrSavedLocation         As String = "D4"
     Const addrColorColStart         As String = "F1"
     Const addrColorColEnd           As String = "F2"
-    
-    '==================================================
-    'Start
-    '==================================================
     
     Dim wbMain                      As Workbook
     Dim shtMain                     As Worksheet
@@ -37,6 +29,7 @@ Sub EmphasizeSimilar()
     On Error Resume Next
     Set lo = shtMain.ListObjects(1)
     
+    ' Test if Table exist in active sheet
     If lo Is Nothing Then
         MsgBox "Current sheet doesn't have any table", vbExclamation
         Exit Sub
@@ -49,8 +42,9 @@ Sub EmphasizeSimilar()
     Dim iColTags                    As Integer
     Dim iColLocation                As Integer
     Dim iColSubject                 As Integer
+    Dim iColFoundTag                As Integer
     
-    'Get Columns letters based on found headings in table
+    'Get Columns indexes based on found headings in table - All headings must present
     iColFilter = lo.ListColumns("Filter").Range.Column
     iColLock = lo.ListColumns("Lock").Range.Column
     iColDate = lo.ListColumns("Date").Range.Column
@@ -58,13 +52,18 @@ Sub EmphasizeSimilar()
     iColTags = lo.ListColumns("Tags").Range.Column
     iColLocation = lo.ListColumns("Location").Range.Column
     iColSubject = lo.ListColumns("Subject").Range.Column
+    iColFoundTag = lo.ListColumns("Found Tag").Range.Column
     
     'todo - validate all columns exist in excel
     
-    'Clear filter in case it was alredy applied
+    'Clear autofilter in case it was alredy applied
     On Error Resume Next
     lo.AutoFilter.ShowAllData
-    
+        
+    'Clear all contents of Filter column
+    lo.ListColumns("Filter").DataBodyRange.ClearContents
+    lo.ListColumns("Found Tag").DataBodyRange.ClearContents
+        
     'Get First and last row index
     Dim iFirstTableRow              As Integer
     Dim lRowLastInTable             As Long
@@ -82,11 +81,12 @@ Sub EmphasizeSimilar()
     Set rngStyleApply = shtMain.Range(Cells(iFirstTableRow, colorStartColumn), Cells(lRowLastInTable, colorEndColumn))
     With rngStyleApply.Font
         .Bold = False
-        .Color = RGB(56, 56, 56)
+        .Color = RGB(190, 190, 190)
     End With
     
-    'Validate selected row in valid range
+    ' If selected row outside of table - stop macro - Keep unfiltered
     If (sSelectedRow < iFirstTableRow) Then
+        rngStyleApply.Font.Color = RGB(56, 56, 56)
         Exit Sub
     End If
         
@@ -116,104 +116,86 @@ Sub EmphasizeSimilar()
     rngSavedLocation.Value = shtMain.Cells(sSelectedRow, iColLocation).Value
     
     'Debug Prints
-    Debug.Print ("tag list from current row: " & sSelectedTagList)
-    Debug.Print ("Current selected subject: " & sSelectedSubject)
-    Debug.Print ("Previous selected subject: " & sPreviousSubject)
+    'Debug.Print ("tag list from current row: " & sSelectedTagList)
+    'Debug.Print ("Current selected subject: " & sSelectedSubject)
+    'Debug.Print ("Previous selected subject: " & sPreviousSubject)
 
     '==================================================
-    'Cycle through lines
+    'Cycle through tags from selected row
     '==================================================
-    Dim lRowIndex                   As Long
-    Dim sRowTagList                 As String
-    Dim bTagMatch                   As Boolean
-    Dim bSubjectMatch               As Boolean
-    Dim arrRowTagList()             As String
+    Dim rngFilter           As Range
+    Dim rngBold             As Range
+    Dim rngLock             As Range
+    Dim rngSubject          As Range
+    Dim rngColorApply       As Range
+    Dim rngTags             As Range
+    Dim rngFoundTag         As Range
+    Dim selectedTag         As Variant
     
-    For lRowIndex = iFirstTableRow To lRowLastInTable
+    For Each selectedTag In arrSelectedTagList
+    
+        Debug.Print (selectedTag)
         
-        sRowTagList = Cells(lRowIndex, iColTags)
+        '==================================================
+        'Cycle through excel rows
+        '==================================================
+        Dim lRowIndex                   As Long
+        Dim sRowTagList                 As String
+    
+        For lRowIndex = iFirstTableRow To lRowLastInTable
         
-        If (Len(sRowTagList)) Then
-            
-            bTagMatch = False
-            bSubjectMatch = False
-            arrRowTagList = Split(sRowTagList, " ")
-            
-            '==================================================
-            'Cycle through tags from selected row
-            '==================================================
-            Dim selectedTag As Variant
-            For Each selectedTag In arrSelectedTagList
-                
-                'Mark row which have one tag which included in selected row
-                If Not (bTagMatch) Then
-                    Dim targetTag As Variant
-                    For Each targetTag In arrRowTagList
-                        If (selectedTag = targetTag) Then
-                            bTagMatch = True
-                            Exit For
-                        End If
-                    Next targetTag
-                End If
-                
-                'Mark row which have at least one keyword from tag section in subject
-                If InStr(1, Cells(lRowIndex, iColSubject).Value, selectedTag) Then
-                    bSubjectMatch = True
-                End If
-                
-            Next selectedTag
-            
-            '==================================================
-            'Set row filter result value for future sorting
-            '==================================================
-            Dim rngFilter           As Range
-            Dim rngBold             As Range
-            Dim rngLock             As Range
-            Dim rngSubject          As Range
-            Dim rngColorApply       As Range
             Set rngFilter = shtMain.Cells(lRowIndex, iColFilter)
             Set rngBold = shtMain.Range(Cells(lRowIndex, iColSubject), Cells(lRowIndex, iColSubject))
             Set rngLock = shtMain.Cells(lRowIndex, iColLock)
             Set rngSubject = shtMain.Cells(lRowIndex, iColSubject)
             Set rngColorApply = shtMain.Range(Cells(lRowIndex, colorStartColumn), Cells(lRowIndex, colorEndColumn))
+            Set rngTags = shtMain.Cells(lRowIndex, iColTags)
+            Set rngFoundTag = shtMain.Cells(lRowIndex, iColFoundTag)
             
-            If (bTagMatch) Then
-                'Tags matched in tags cell - color black + bold
-                rngBold.Font.Bold = True
-                rngFilter.Value = "Match"
-                iNumberOfConnections = iNumberOfConnections + 1
-            ElseIf (bSubjectMatch) Then
-                'tags included subject cell - color grey
-                rngFilter.Value = "Sugest"
-                rngColorApply.Font.Color = RGB(128, 128, 128)
-            Else
-                'All remained rows - very light grey
-                rngFilter.Value = "Others"
-                rngColorApply.Font.Color = RGB(190, 190, 190)
+            sRowTagList = rngTags.Value
+            sRowSubject = rngSubject.Value
+            
+            ' Do only if tag cell not empty
+            If (Len(sRowTagList)) Then
+                
+                ' Mark Match or Suggest
+                If InStr(sRowTagList, selectedTag) > 0 Then
+                    'Debug.Print ("Selected tag found in list of this row tag - Mark it")
+                    rngBold.Font.Bold = True
+                    rngFilter.Value = "Match"
+                    rngFoundTag.Value = rngFoundTag.Value & " " & selectedTag
+                    rngColorApply.Font.Color = RGB(56, 56, 56)
+                    iNumberOfConnections = iNumberOfConnections + 1
+                ElseIf InStr(sRowSubject, selectedTag) > 0 Then
+                    'Debug.Print ("Selected tag found in subject - suggest it")
+                    rngFilter.Value = "Sugest"
+                    rngColorApply.Font.Color = RGB(128, 128, 128)
+                End If
+                
+                'Lock rows have highest priority of sorting above current row + color green
+                If (rngLock.Value = "yes") Then
+                    rngFilter.Value = "Lock"
+                    rngColorApply.Font.Color = RGB(0, 176, 80)
+                End If
+                
+                'Color previous row - light blue
+                If (rngSubject.Value = sPreviousSubject) Then
+                    rngColorApply.Font.Color = RGB(142, 169, 219)
+                End If
+                
+                'Selected row = 1 to make it before results + color Dark blue + update date
+                If (lRowIndex = sSelectedRow) Then
+                    rngFilter.Value = "Main"
+                    shtMain.Cells(lRowIndex, iColDate).Value = todayDate
+                    rngColorApply.Font.Color = RGB(48, 84, 150)
+                End If
+                
             End If
-            
-            'Lock rows have highest priority of sorting above current row + color green
-            If (rngLock.Value = "yes") Then
-                rngFilter.Value = "Lock"
-                rngColorApply.Font.Color = RGB(0, 176, 80)
-            End If
-            
-            'Color previous row - light blue
-            If (rngSubject.Value = sPreviousSubject) Then
-                rngColorApply.Font.Color = RGB(142, 169, 219)
-            End If
-            
-            'Selected row = 1 to make it before results + color Dark blue + update date
-            If (lRowIndex = sSelectedRow) Then
-                rngFilter.Value = "Main"
-                shtMain.Cells(lRowIndex, iColDate).Value = todayDate
-                rngColorApply.Font.Color = RGB(48, 84, 150)
-            End If
-            
-        End If
-    
-    Next lRowIndex
-    
+        
+        Next lRowIndex
+        
+    Next selectedTag
+
     '==================================================
     'Final configs
     '==================================================
@@ -223,7 +205,7 @@ Sub EmphasizeSimilar()
     
     'Filter all matches and blank lines
     lo.Range.AutoFilter Field:=iColFilter, Operator:=xlFilterValues, _
-        Criteria1:=Array("", "Main", "Match", "Sugest", "Lock")
+        Criteria1:=Array("Main", "Match", "Sugest", "Lock")
     'TO DO - Make field dynamic if this column in different place
         
     'Restore initial settings
