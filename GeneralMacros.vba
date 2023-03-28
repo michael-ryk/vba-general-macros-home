@@ -96,12 +96,10 @@ Sub EmphasizeSimilar()
     Dim sSelectedSubject            As String
     Dim sPreviousSubject            As String
     Dim todayDate                   As Date
-    Dim iNumberOfConnections        As Integer
     sSelectedTagList = Cells(sSelectedRow, iColTags)
     arrSelectedTagList = Split(sSelectedTagList, " ")
     sSelectedSubject = shtMain.Cells(sSelectedRow, iColSubject).Value
     todayDate = Date
-    iNumberOfConnections = 0
     
     'Save aside current selected row details for next run
     Dim rngSavedSubject             As Range
@@ -120,6 +118,10 @@ Sub EmphasizeSimilar()
     'Debug.Print ("Current selected subject: " & sSelectedSubject)
     'Debug.Print ("Previous selected subject: " & sPreviousSubject)
 
+    'Reset number of connections for selection
+    Dim iNumberOfConnections        As Integer
+    iNumberOfConnections = 0
+
     '==================================================
     'Cycle through tags from selected row
     '==================================================
@@ -130,6 +132,7 @@ Sub EmphasizeSimilar()
     Dim rngColorApply       As Range
     Dim rngTags             As Range
     Dim rngFoundTag         As Range
+    Dim rngDate             As Range
     Dim selectedTag         As Variant
     
     For Each selectedTag In arrSelectedTagList
@@ -152,6 +155,7 @@ Sub EmphasizeSimilar()
             Set rngColorApply = shtMain.Range(Cells(lRowIndex, colorStartColumn), Cells(lRowIndex, colorEndColumn))
             Set rngTags = shtMain.Cells(lRowIndex, iColTags)
             Set rngFoundTag = shtMain.Cells(lRowIndex, iColFoundTag)
+            Set rngDate = shtMain.Cells(lRowIndex, iColDate)
             
             sRowTagList = rngTags.Value
             sRowSubject = rngSubject.Value
@@ -163,10 +167,16 @@ Sub EmphasizeSimilar()
                 If InStr(sRowTagList, selectedTag) > 0 Then
                     'Debug.Print ("Selected tag found in list of this row tag - Mark it")
                     rngBold.Font.Bold = True
-                    rngFilter.Value = "Match"
-                    rngFoundTag.Value = rngFoundTag.Value & " " & selectedTag
-                    rngColorApply.Font.Color = RGB(56, 56, 56)
-                    iNumberOfConnections = iNumberOfConnections + 1
+                    If (lRowIndex = sSelectedRow) Then
+                        rngFilter.Value = "Main"
+                        rngDate.Value = todayDate
+                        rngColorApply.Font.Color = RGB(48, 84, 150)
+                    Else
+                        rngFilter.Value = "Match"
+                        rngFoundTag.Value = rngFoundTag.Value & " " & selectedTag
+                        rngColorApply.Font.Color = RGB(56, 56, 56)
+                        iNumberOfConnections = iNumberOfConnections + 1
+                    End If
                 ElseIf InStr(sRowSubject, selectedTag) > 0 Then
                     'Debug.Print ("Selected tag found in subject - suggest it")
                     rngFilter.Value = "Sugest"
@@ -182,13 +192,6 @@ Sub EmphasizeSimilar()
                 'Color previous row - light blue
                 If (rngSubject.Value = sPreviousSubject) Then
                     rngColorApply.Font.Color = RGB(142, 169, 219)
-                End If
-                
-                'Selected row = 1 to make it before results + color Dark blue + update date
-                If (lRowIndex = sSelectedRow) Then
-                    rngFilter.Value = "Main"
-                    shtMain.Cells(lRowIndex, iColDate).Value = todayDate
-                    rngColorApply.Font.Color = RGB(48, 84, 150)
                 End If
                 
             End If
