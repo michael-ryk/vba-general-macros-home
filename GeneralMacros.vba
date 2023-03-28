@@ -141,6 +141,7 @@ Sub EmphasizeSimilar()
         '==================================================
         Dim lRowIndex                   As Long
         Dim sRowTagList                 As String
+        Dim sRowSubject                 As String
     
         For lRowIndex = iFirstTableRow To lRowLastInTable
         
